@@ -1,0 +1,28 @@
+#!/bin/bash
+
+if [ -d "/tmpfs" ]; then TMPDIR="/tmpfs"; else TMPDIR="/tmp"; fi
+
+echo "Content-Type: application/json; charset=utf-8"
+echo "Access-Control-Allow-Origin: *"
+echo "Cache-Control: max-age=900"
+echo ""
+
+CMD=${0%/*}/bin/rtsp.sh
+
+if [ ! -e "${CMD}" ]; then 
+  error="command not found"
+else
+  temp=$(mktemp)
+  output=$(${CMD} 2> ${temp})
+  code=$?
+  if [ -z "${output:-}" ]; then
+    error="code: ${code}; output: $(cat ${temp})"
+  fi
+  rm -f ${temp}
+fi
+
+if [ -z "${error:-}" ]; then
+  echo "${output:-null}"
+else
+  echo '{"command":"'${CMD}'","error":"'${error:-}'","env":"'$(env)'"}'
+fi

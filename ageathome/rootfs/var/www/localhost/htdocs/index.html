@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Age-At-Home Add-on</title>
+<link href="https://fonts.googleapis.com/css?family=IBM+Plex+Sans:wght@100" rel="stylesheet"> <style> body { font-family: 'IBM+Plex+Sans', sans-serif, serif; } </style>
+</head>
+
+<script>
+window.onload = function () {
+  rfr = document.referrer.split('/');
+  prot = rfr[0];
+  site = rfr[2].split(':');
+  port = site[1];
+  site = site[0];
+
+  cid = document.getElementById("config");
+  cid.href = prot + "//" + site + ":9999/cgi-bin/config";
+
+  cid = document.getElementById("options");
+  cid.href = prot + "//" + site + ":9999/cgi-bin/options";
+
+  cid = document.getElementById("rtsp");
+  cid.href = prot + "//" + site + ":9999/cgi-bin/rtsp";
+
+  cid = document.getElementById("storage");
+  cid.href = prot + "//" + site + ":9999/cgi-bin/storage";
+
+  cid = document.getElementById("test");
+  cid.href = prot + "//" + site + ":9999/cgi-bin/test";
+
+}
+</script>
+
+<body>
+
+<h1><a href="https://github.com/ageathome/core"><code>Age-At-Home</code></a></h1>
+
+<h2>UI</h2>
+
+<ul>
+</ul>
+
+<h2>API</h2>
+
+<ul>
+<li>Test API: <a id="test" href=""><code>test</code></a><div id="test"></div></li>
+<li>Add-on configuration: <a id="config" href=""><code>config</code></a><div id="config"></div></li>
+<li>Add-on options: <a id="options" href=""><code>options</code></a><div id="options"></div></li>
+<li>Discovered RTSP cameras: <a id="rtsp" href=""><code>rtsp</code></a><div id="rtsp"></div></li>
+<li>Storage data: <a id="storage" href=""><code>storage</code></a><div id="storage"></div></li>
+</ul>
+
+</ul>
+
+</body>
+</html>
