@@ -1,0 +1,1 @@
+../../motion-ai/homeassistant/python_scripts/switch_entities.py

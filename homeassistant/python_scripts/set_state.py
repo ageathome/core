@@ -1,0 +1,1 @@
+../../motion-ai/homeassistant/python_scripts/set_state.py

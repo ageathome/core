@@ -1,0 +1,1 @@
+../../motion-ai/homeassistant/python_scripts/attribute_base64_decode.py
