@@ -1,7 +1,7 @@
 {
   "name": "Age-At-Home",
   "description": "Cognitive elder -care and -support",
-  "url": "https://github.com/dcmartin/ageathome/",
+  "url": "https://github.com/ageathome",
   "slug": "ageathome",
   "image": "dcmartin/{arch}-addon-ageathome",
   "stage": "stable",
