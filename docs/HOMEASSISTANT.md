@@ -11,7 +11,7 @@ for instructions on installing the system image for a RaspberryPi 4.
 After several minutes the Home-Assistant (**HA**) server will start and indicate a _Preparing Home Assistant_ page at [http://homeassistant.local:8123/](http://homeassistant.local:8123/) similar to the image
 below.
 
-<img width="50%"src="preparing-ha.png">
+<img width="50%" src="preparing-ha.png">
 
 Expect to wait over 20 minutes for this step to complete.
 
