@@ -2,7 +2,7 @@
 
 ## Install Home-Assistant
 
-Home-Assistant is required to install using the [QUICKSTART](QUICKSTART.md);
+Home-Assistant is required to install using the [QUICKSTART.md](QUICKSTART.md);
 visit the Home-Assistant [installation page](https://www.home-assistant.io/installation/raspberrypi)
 for instructions on installing the system image for a RaspberryPi 4.
 
