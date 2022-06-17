@@ -38,7 +38,7 @@ tts:
   - platform: google_translate
 
 favicon:
-  title: '🏠 Age-At-Home'
+  title: 'Age@Home'
   icon_path: /local/favicons/
 
 sensor datetime:
