@@ -1,4 +1,4 @@
-# &#127916; - `ageathome`
+`README.md`
 
 This repository contains the requisite modications to the [motion-ai](http://github.com/dcmartin/motion-ai) 
 foundation repository for [Age@Home](http://age-at-home.com)
