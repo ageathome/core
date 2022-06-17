@@ -95,7 +95,7 @@ Some features of Home-Assistant are not enabled unless _advanced mode_ is select
 
 Home-Assistant may be extended using _add-ons_ that run [Docker](http://docker.io) containers that provide a secure method of software distribution.  The [Age-At-Home](http://github.com/dcmartin/ageathome) software configures Home-Assistant with all the necessary entities and analysis required for notifications about activity, alarms and alerts -- with an updated dashboard.
 
-Refer to [AGEATHOME.md](AGEATHOME.mD) for specific instructions.
+Refer to [AGEATHOME.md](AGEATHOME.md) for specific instructions.
 
 
 
