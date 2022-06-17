@@ -1,4 +1,4 @@
-# `HOMEASSISTANT.md` - Instructions installation of Home-Assistant
+# `HOMEASSISTANT.md`
 
 ## Install Home-Assistant
 
