@@ -4,3 +4,4 @@ This repository contains the requisite modications to the [motion-ai](http://git
 foundation repository for [Age@Home](http://age-at-home.com)
 as well as components for the [_add-on_](http://github.com/ageathome/addons).
 
+See [QUICKSTART,md](docs/QUICKSTART.md) for installation instructions.
