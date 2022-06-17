@@ -4,8 +4,8 @@
   "key": "lovelace",
   "data": {
     "config": {
-      "icon": "mdi:home",
-      "title": "Age-At-Home",
+      "icon": "mdi:home-heart",
+      "title": "Age@Home",
       "views": [
         {
           "title": "SUPPORT",
