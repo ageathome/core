@@ -1,5 +1,5 @@
 {
-  "name": "Age-At-Home",
+  "name": "Age@Home",
   "description": "Cognitive elder -care and -support",
   "url": "https://github.com/ageathome",
   "slug": "ageathome",
@@ -51,7 +51,7 @@
   },
   "panel_admin": true,
   "panel_icon": "mdi:home-heart",
-  "panel_title": "Age-At-home",
+  "panel_title": "Age@Home",
   "ports": {
     "9999/tcp": 9999
   },

@@ -16,7 +16,25 @@ The add-on container for the Age@Home add-on is securely distributed from the [D
 ### 1. Add the repository
 The Age@Home add-on is cataloged in a [repository](http://github.com/ageathome/addons) that provides requisite information for automated deployment through Home-Assistant; see more about [_add-ons_](http://home-assistant.io/addons).
 
+Enter the value `http://github.com/ageathome/addons` as indicated below and click `ADD`
+
 <img width="50%" src='ha-addon-repositories.png'>
+
+### 2. Install the add-on
+
+Adding the repository creates a new item in the Add-on Store similar to the image below.
+
+<img width="50%" src='ageathome-repository.png'>
+
+Selecting the item enables specifying configuration information and starting the add-on similar to the image below.
+
+<img width="75%" src='ageathome-addon.png'>
+
+Optionally review documanrtion and click on `INSTALL`
+
+### 3. Configure and start
+
+Once the add-on has been installed it will appear in the 
 
 ### Commands
 
