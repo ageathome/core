@@ -40,7 +40,7 @@ Provide preferences or accept defaults and press <code>NEXT</code> to complete t
 
 <img width="50%" src="optin-options.png">
 
-Provide preferences or accept defaults and press <code>NEXT</code> to complete this step.
+Provide preferences or accept defaults and press <code>NEXT</code> to complete this step. The information collected is summarized [here](http://analytics.home-assistant.io).
 
 
 ### 4. Network discovery
