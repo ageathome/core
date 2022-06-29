@@ -4,8 +4,8 @@
   "url": "https://github.com/ageathome",
   "slug": "ageathome",
   "image": "dcmartin/{arch}-addon-ageathome",
-  "stage": "stable",
-  "version": "0.0.1",
+  "stage": "experimental",
+  "version": "0.0.2",
   "arch": [
     "aarch64",
     "amd64",
@@ -16,13 +16,13 @@
   "homeassistant_api": false,
   "host_network": true,
   "ingress": true,
-  "ingress_port": 9999,
+  "ingress_port": 7999,
   "startup": "services",
   "timeout": 300,
   "tmpfs": true,
   "audio": false,
   "video": true,
-  "webui": "http://[HOST]:[PORT:9999]/",
+  "webui": "http://[HOST]:[PORT:7999]/",
   "boot": "auto",
   "environment": {
     "LOG_FORMAT": "{LEVEL}: {MESSAGE}"
@@ -53,10 +53,10 @@
   "panel_icon": "mdi:home-heart",
   "panel_title": "Age@Home",
   "ports": {
-    "9999/tcp": 9999
+    "7999/tcp": 7999
   },
   "ports_description": {
-    "9999/tcp": "API"
+    "7999/tcp": "API"
   },
   "privileged": [
     "SYS_ADMIN"
