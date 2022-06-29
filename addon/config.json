@@ -79,9 +79,7 @@
     "router_name": "str?",
     "username": "str?",
     "password": "str?",
-    "person": {
-      "user": "str?"
-    },
+    "person": "str?",
     "w3w": {
       "words": "str?",
       "apikey": "str?",
