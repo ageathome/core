@@ -46,8 +46,10 @@
       "username": "!secret mqtt-username"
     },
     "overview": {},
-    "media": {},
-    "w3w": {}
+    "w3w": {
+      "words": "///what.three.words",
+      "apikey": "APIKEY4U"
+    }
   },
   "panel_admin": true,
   "panel_icon": "mdi:home-heart",
@@ -77,6 +79,9 @@
     "router_name": "str?",
     "username": "str?",
     "password": "str?",
+    "person": {
+      "user": "str?"
+    },
     "w3w": {
       "words": "str?",
       "apikey": "str?",
