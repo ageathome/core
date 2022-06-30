@@ -27,9 +27,6 @@ RUN apk add --no-cache \
   apache2-utils
 
 RUN apk add --no-cache \
-  imagemagick
-
-RUN apk add --no-cache \
   nmap
 
 RUN apk add --no-cache \

@@ -441,35 +441,37 @@ addon::reload
 
 if [ ! -d /data/motion-ai ]; then
   bashio::log.info "Cloning motion-ai"
-  git clone http://github.com/dcmartin/motion-ai /data/motion-ai
+  git clone http://github.com/dcmartin/motion-ai /data/motion-ai 2>&1 /dev/null
 else
-  pushd /data/motion-ai
+  pushd /data/motion-ai 2>&1 /dev/null
   bashio::log.info "Pulling motion-ai"
-  git pull
-  popd
+  git pull 2>&1 /dev/null
+  popd 2>&1 /dev/null
 fi
 
 if [ ! -d /data/ageathome ]; then
   bashio::log.info "Cloning ageathome"
-  git clone http://github.com/ageathome/core /data/ageathome
+  git clone http://github.com/ageathome/core /data/ageathome 2>&1 /dev/null
 else
-  pushd /data/ageathome
-  if [ ! -e motion-ai ] && [ -d ../motion-ai ]; then
+  pushd /data/ageathome 2>&1 /dev/null
+  if [ ! -e motion-ai ] && [ -d /data/motion-ai ]; then
     bashio::log.info "Linking motion-ai"
-    ln -s ../motion-ai .
+    ln -s /data/motion-ai .
+  else
+    bashio::log.error "Did not find /data/motion-ai"
   fi
   bashio::log.info "Pulling ageathome"
-  git pull
-  popd
+  git pull 2>&1 /dev/null
+  popd 2>&1 /dev/null
 fi
 
 if [ -d /data/ageathome/homeassistant ]; then
-  pushd /data/ageathome/homeassistant
+  pushd /data/ageathome/homeassistant 2>&1 /dev/null
   bashio::log.info "Building ageathome"
-  PACKAGES= make
+  PACKAGES= make 2>&1 /dev/null
   bashio::log.info "Updatting config"
   tar chf - . | ( cd /config ; tar xf - )
-  popd
+  popd 2>&1 /dev/null
 else
   bashio::log.error "Cannot find directory: /data/ageathome/homeassistant"
 fi
@@ -478,14 +480,12 @@ fi
 while true; do
 
     ## publish configuration
-    ( motion.mqtt.pub -r -q 2 -t "$(motion.config.group)/$(motion.config.device)/start" -f "$(motion.config.file)" \
+    ( motion.mqtt.pub -r -q 2 -t "$(motion.config.group)/$(motion.config.device)/start" -f "$(motion.config.file)" 2>&1 /dev/null \
       && bashio::log.info "Published configuration to MQTT; topic: $(motion.config.group)/$(motion.config.device)/start" ) \
       || bashio::log.error "Failed to publish configuration to MQTT; config: $(motion.config.mqtt)"
 
     ## on-board devices and set CoIoT for motion sensors
     # implement this code
-
-    ## check for software updates (?)
 
     ## sleep
     bashio::log.info "Sleeping; ${MOTION_WATCHDOG_INTERVAL:-1800} seconds ..."

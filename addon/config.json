@@ -1,11 +1,12 @@
 {
   "name": "Age@Home",
+  "init": false,
   "description": "Cognitive elder -care and -support",
   "url": "https://github.com/ageathome",
   "slug": "ageathome",
   "image": "dcmartin/{arch}-addon-ageathome",
   "stage": "experimental",
-  "version": "0.0.5",
+  "version": "0.0.7",
   "arch": [
     "aarch64",
     "amd64",
