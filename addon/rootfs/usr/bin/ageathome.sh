@@ -12,7 +12,7 @@ function addon::setup.update()
   local c="${1:-}"
   local e="${2:-}"
   local update
-  local path=/config/setup.json
+  local path="/config/setup.json"
 
   old="$(jq -r '.'"${e}"'?' ${path})"
   new=$(jq -r '.'"${c}"'?' "/data/options.json")
@@ -472,22 +472,27 @@ else
 fi
 
 if [ -d /share/ageathome ] && [ ! -e /config/setup.json ]; then
-  bashio::log.info "Initializing /config from /share/ageathome/homeassistant"
-  pushd /share/ageathome/homeassistant &> /dev/null
-  tar chf - . | ( cd /config ; tar xf - )
+  bashio::log.info "Initializing /share/ageathome"
+  pushd /share/ageathome &> /dev/null
+  make homeassistant/setup.json && mv homeassistant/setup.json /config
   popd &> /dev/null
 fi
 
-if [ -e /config/setup.json ]; then
+if [ -d /share/ageathome ] && [ -d /share/motion-ai ] && [ -e /config/setup.json ]; then
+  bashio::log.info "Updating /config from /share/ageathome/homeassistant"
+  pushd /share/ageathome/homeassistant &> /dev/null
+  tar chf - . | ( cd /config ; tar xf - )
+  popd &> /dev/null
+  bashio::log.info "Making /config"
   pushd /config &> /dev/null
-  bashio::log.info "Pulling /config"
-  git pull &> /dev/null
-  bashio::log.info "Updating /config"
   PACKAGES= make &> /dev/null
   popd &> /dev/null
 else
   bashio::log.error "Cannot find /config/setup.json"
 fi
+
+## fork process to on-board devices and set CoIoT for motion sensors
+# implement this code
 
 ## forever
 while true; do
@@ -496,9 +501,6 @@ while true; do
     ( motion.mqtt.pub -r -q 2 -t "$(motion.config.group)/$(motion.config.device)/start" -f "$(motion.config.file)" &> /dev/null \
       && bashio::log.info "Published configuration to MQTT; topic: $(motion.config.group)/$(motion.config.device)/start" ) \
       || bashio::log.warn "Failed to publish configuration to MQTT; config: $(motion.config.mqtt)"
-
-    ## fork process to on-board devices and set CoIoT for motion sensors
-    # implement this code
 
     ## sleep
     bashio::log.info "Sleeping; ${MOTION_WATCHDOG_INTERVAL:-1800} seconds ..."
