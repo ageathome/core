@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Age-At-Home Add-on</title>
+<title>Age@Home add-on for Home-Assistant</title>
 <link href="https://fonts.googleapis.com/css?family=IBM+Plex+Sans:wght@100" rel="stylesheet"> <style> body { font-family: 'IBM+Plex+Sans', sans-serif, serif; } </style>
 </head>
 
@@ -14,19 +14,19 @@ window.onload = function () {
   site = site[0];
 
   cid = document.getElementById("config");
-  cid.href = prot + "//" + site + ":9999/cgi-bin/config";
+  cid.href = prot + "//" + site + ":7999/cgi-bin/config";
 
   cid = document.getElementById("options");
-  cid.href = prot + "//" + site + ":9999/cgi-bin/options";
+  cid.href = prot + "//" + site + ":7999/cgi-bin/options";
 
   cid = document.getElementById("rtsp");
-  cid.href = prot + "//" + site + ":9999/cgi-bin/rtsp";
+  cid.href = prot + "//" + site + ":7999/cgi-bin/rtsp";
 
   cid = document.getElementById("storage");
-  cid.href = prot + "//" + site + ":9999/cgi-bin/storage";
+  cid.href = prot + "//" + site + ":7999/cgi-bin/storage";
 
   cid = document.getElementById("test");
-  cid.href = prot + "//" + site + ":9999/cgi-bin/test";
+  cid.href = prot + "//" + site + ":7999/cgi-bin/test";
 
 }
 </script>
