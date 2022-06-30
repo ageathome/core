@@ -6,7 +6,7 @@
   "slug": "ageathome",
   "image": "dcmartin/{arch}-addon-ageathome",
   "stage": "experimental",
-  "version": "0.0.8",
+  "version": "0.1.0",
   "arch": [
     "aarch64",
     "amd64",
@@ -45,6 +45,12 @@
       "image": "overview.jpeg",
       "mode": "local",
       "zoom": "18"
+    },
+    "mqtt": {
+      "host": "core-mosquitto",
+      "username": "username",
+      "password": "password",
+      "port": "1883"
     },
     "w3w": {
       "words": "///what.three.words",
@@ -85,6 +91,12 @@
       "image": "str?",
       "mode": "list(local|hybrid|roadmap|satellite|terrain)?",
       "zoom": "int(10,22)?"
+    },
+    "mqtt": {
+      "host": "str?",
+      "username": "str?",
+      "password": "str?",
+      "port": "int?"
     },
     "w3w": {
       "words": "str?",

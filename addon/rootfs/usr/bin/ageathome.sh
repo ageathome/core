@@ -440,38 +440,38 @@ bashio::log.notice "Started Apache on ${MOTION_APACHE_HOST}:${MOTION_APACHE_PORT
 addon::reload
 
 if [ ! -d /share/motion-ai ]; then
-  bashio::log.info "Cloning motion-ai"
-  git clone http://github.com/dcmartin/motion-ai /share/motion-ai 2>&1 /dev/null
+  bashio::log.info "Cloning /share/motion-ai"
+  git clone http://github.com/motion-ai/motion-ai /share/motion-ai &> /dev/null
 else
-  pushd /share/motion-ai 2>&1 /dev/null
-  bashio::log.info "Pulling motion-ai"
-  git pull 2>&1 /dev/null
-  popd 2>&1 /dev/null
+  pushd /share/motion-ai &> /dev/null
+  bashio::log.info "Pulling /share/motion-ai"
+  git pull &> /dev/null
+  popd &> /dev/null
 fi
 
 if [ ! -d /share/ageathome ]; then
-  bashio::log.info "Cloning ageathome"
-  git clone http://github.com/ageathome/core /share/ageathome 2>&1 /dev/null
+  bashio::log.info "Cloning /share/ageathome"
+  git clone http://github.com/ageathome/core /share/ageathome &> /dev/null
 else
-  pushd /share/ageathome 2>&1 /dev/null
+  pushd /share/ageathome &> /dev/null
   if [ ! -e motion-ai ] && [ -d /share/motion-ai ]; then
-    bashio::log.info "Linking motion-ai"
+    bashio::log.info "Linking /share/motion-ai"
     ln -s /share/motion-ai .
-  else
-    bashio::log.error "Did not find /share/motion-ai"
+  elif [ ! -d /share/motion-ai ]; then
+    bashio::log.error "Could not link to /share/motion-ai"
   fi
-  bashio::log.info "Pulling ageathome"
-  git pull 2>&1 /dev/null
-  popd 2>&1 /dev/null
+  bashio::log.info "Pulling /share/ageathome"
+  git pull &> /dev/null
+  popd &> /dev/null
 fi
 
 if [ -d /share/ageathome/homeassistant ]; then
-  pushd /share/ageathome/homeassistant 2>&1 /dev/null
-  bashio::log.info "Building ageathome"
-  PACKAGES= make 2>&1 /dev/null
-  bashio::log.info "Updatting config"
+  pushd /share/ageathome/homeassistant &> /dev/null
+  bashio::log.info "Making /share/ageathome/homeassistant"
+  PACKAGES= make &> /dev/null
+  bashio::log.info "Updating /config"
   tar chf - . | ( cd /config ; tar xf - )
-  popd 2>&1 /dev/null
+  popd &> /dev/null
 else
   bashio::log.error "Cannot find directory: /share/ageathome/homeassistant"
 fi
@@ -480,7 +480,7 @@ fi
 while true; do
 
     ## publish configuration
-    ( motion.mqtt.pub -r -q 2 -t "$(motion.config.group)/$(motion.config.device)/start" -f "$(motion.config.file)" 2>&1 /dev/null \
+    ( motion.mqtt.pub -r -q 2 -t "$(motion.config.group)/$(motion.config.device)/start" -f "$(motion.config.file)" &> /dev/null \
       && bashio::log.info "Published configuration to MQTT; topic: $(motion.config.group)/$(motion.config.device)/start" ) \
       || bashio::log.error "Failed to publish configuration to MQTT; config: $(motion.config.mqtt)"
 
