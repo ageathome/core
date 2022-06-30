@@ -12,8 +12,9 @@ function addon::setup.update()
   local c="${1:-}"
   local e="${2:-}"
   local update
+  local path=/config/setup.json
 
-  old="$(jq -r '.'"${e}"'?' /config/setup.json)"
+  old="$(jq -r '.'"${e}"'?' ${path})"
   new=$(jq -r '.'"${c}"'?' "/data/options.json")
 
   if [ "${new:-null}" != 'null' ] &&  [ "${old:-}" != "${new:-}" ]; then
@@ -51,7 +52,6 @@ function addon::reload()
           # ww3
           tf=$(addon::setup.update 'w3w.apikey' 'MOTION_W3W_APIKEY') && update=$((update+tf))
           tf=$(addon::setup.update 'w3w.words' 'MOTION_W3W_WORDS') && update=$((update+tf))
-          tf=$(addon::setup.update 'w3w.email' 'MOTION_W3W_EMAIL') && update=$((update+tf))
           # router
           tf=$(addon::setup.update 'router_name' 'MOTION_ROUTER_NAME') && update=$((update+tf))
           # host
@@ -80,14 +80,9 @@ function addon::reload()
 
         # test if update
         if [ ${update:-0} -gt 0 ]; then
-          bashio::log.notice "Automatically rebuilding Lovelace and YAML"
-          pushd /config &> /dev/null
-          make tidy --silent &> /dev/null
-          make --silent &> /dev/null
-          popd &> /dev/null
-          bashio::log.notice "Rebuild complete; restart Home Assistant"
+          bashio::log.notice "Updated settings"
         else
-          bashio::log.notice "No rebuild required"
+          bashio::log.notice "No updates"
         fi
         break
       fi
@@ -249,7 +244,6 @@ JSON='{"config_path":"'"${CONFIG_PATH}"'","ipaddr":"'${ipaddr}'","hostname":"'"$
 VALUE=$(jq -r ".device" "${CONFIG_PATH}")
 if [ -z "${VALUE}" ] || [ "${VALUE}" == "null" ]; then
   VALUE="$(hostname -s)"
-  bashio::log.warning "device unspecified; setting device: ${VALUE}"
 fi
 JSON="${JSON}"',"device":"'"${VALUE}"'"'
 bashio::log.info "MOTION_DEVICE: ${VALUE}"
@@ -259,7 +253,6 @@ MOTION_DEVICE="${VALUE}"
 VALUE=$(jq -r ".group" "${CONFIG_PATH}")
 if [ -z "${VALUE}" ] || [ "${VALUE}" == "null" ]; then
   VALUE="motion"
-  bashio::log.warning "group unspecified; setting group: ${VALUE}"
 fi
 JSON="${JSON}"',"group":"'"${VALUE}"'"'
 bashio::log.info "MOTION_GROUP: ${VALUE}"
@@ -269,7 +262,6 @@ MOTION_GROUP="${VALUE}"
 VALUE=$(jq -r ".client" "${CONFIG_PATH}")
 if [ -z "${VALUE}" ] || [ "${VALUE}" == "null" ]; then
   VALUE="+"
-  bashio::log.warning "client unspecified; setting client: ${VALUE}"
 fi
 JSON="${JSON}"',"client":"'"${VALUE}"'"'
 bashio::log.info "MOTION_CLIENT: ${VALUE}"
@@ -280,7 +272,6 @@ VALUE=$(jq -r ".timezone" "${CONFIG_PATH}")
 # Set the correct timezone
 if [ -z "${VALUE}" ] || [ "${VALUE}" == "null" ]; then
   VALUE="GMT"
-  bashio::log.warning "timezone unspecified; defaulting to ${VALUE}"
 else
   bashio::log.info "TIMEZONE: ${VALUE}"
 fi
@@ -317,7 +308,6 @@ bashio::log.debug "Set elevation to ${VALUE}"
 JSON="${JSON}"',"elevation":'"${VALUE}"
 
 ## MQTT
-
 # local MQTT server (hassio addon)
 VALUE=$(jq -r ".mqtt.host" "${CONFIG_PATH}")
 if [ "${VALUE}" == "null" ] || [ -z "${VALUE}" ]; then VALUE="mqtt"; fi
@@ -338,9 +328,22 @@ VALUE=$(jq -r ".mqtt.port" "${CONFIG_PATH}")
 if [ "${VALUE}" == "null" ] || [ -z "${VALUE}" ]; then VALUE=1883; fi
 bashio::log.info "Using MQTT port: ${VALUE}"
 MQTT="${MQTT}"',"port":'"${VALUE}"'}'
-
 # finish
 JSON="${JSON}"',"mqtt":'"${MQTT}"
+
+## W3W
+# local W3W server (hassio addon)
+VALUE=$(jq -r ".w3w.words" "${CONFIG_PATH}")
+if [ "${VALUE}" == "null" ] || [ -z "${VALUE}" ]; then VALUE="w3w"; fi
+bashio::log.info "Using W3W at ${VALUE}"
+W3W='{"words":"'"${VALUE}"'"'
+# apikey
+VALUE=$(jq -r ".w3w.apikey" "${CONFIG_PATH}")
+if [ "${VALUE}" == "null" ] || [ -z "${VALUE}" ]; then VALUE=""; fi
+bashio::log.info "Using W3W apikey: ${VALUE}"
+W3W="${W3W}"',"apikey":"'"${VALUE}"'"}'
+# finish
+JSON="${JSON}"',"w3w":'"${W3W}"
 
 ## ADD-ON configuration
 MOTION='{'
@@ -398,21 +401,20 @@ export MOTION_LOGTO=${VALUE}
 # shared directory for results (not images and JSON)
 VALUE=$(jq -r ".share_dir" "${CONFIG_PATH}")
 if [ "${VALUE}" == "null" ] || [ -z "${VALUE}" ]; then VALUE="/share/${MOTION_GROUP}"; fi
+MOTION="${MOTION}"',"share_dir":"'"${VALUE}"'"'
 bashio::log.debug "Set share_dir to ${VALUE}"
-JSON="${JSON}"',"share_dir":"'"${VALUE}"'"'
 export MOTION_SHARE_DIR="${VALUE}"
 
 # set username and password
 USERNAME=$(jq -r ".username" "${CONFIG_PATH}")
 PASSWORD=$(jq -r ".password" "${CONFIG_PATH}")
-
-# add username and password to configuration
 MOTION="${MOTION}"',"username":"'"${USERNAME}"'"'
 MOTION="${MOTION}"',"password":"'"${PASSWORD}"'"'
 
 ## end motion structure; cameras section depends on well-formed JSON for $MOTION
 MOTION="${MOTION}"'}'
 bashio::log.debug "MOTION: ${MOTION}"
+
 JSON="${JSON}"',"motion":'"${MOTION}"'}'
 
 
@@ -452,7 +454,9 @@ fi
 if [ ! -d /share/ageathome ]; then
   bashio::log.info "Cloning /share/ageathome"
   git clone http://github.com/ageathome/core /share/ageathome &> /dev/null
-else
+fi
+
+if [ -d /share/ageathome ]; then
   pushd /share/ageathome &> /dev/null
   if [ ! -e motion-ai ] && [ -d /share/motion-ai ]; then
     bashio::log.info "Linking /share/motion-ai"
@@ -463,17 +467,26 @@ else
   bashio::log.info "Pulling /share/ageathome"
   git pull &> /dev/null
   popd &> /dev/null
+else
+  bashio::log.error "Cannot find /share/ageathome"
 fi
 
-if [ -d /share/ageathome/homeassistant ]; then
+if [ -d /share/ageathome ] && [ ! -e /config/setup.json ]; then
+  bashio::log.info "Initializing /config from /share/ageathome/homeassistant"
   pushd /share/ageathome/homeassistant &> /dev/null
-  bashio::log.info "Making /share/ageathome/homeassistant"
-  PACKAGES= make &> /dev/null
-  bashio::log.info "Updating /config"
   tar chf - . | ( cd /config ; tar xf - )
   popd &> /dev/null
+fi
+
+if [ -e /config/setup.json ]; then
+  pushd /config &> /dev/null
+  bashio::log.info "Pulling /config"
+  git pull &> /dev/null
+  bashio::log.info "Updating /config"
+  PACKAGES= make &> /dev/null
+  popd &> /dev/null
 else
-  bashio::log.error "Cannot find directory: /share/ageathome/homeassistant"
+  bashio::log.error "Cannot find /config/setup.json"
 fi
 
 ## forever
@@ -482,9 +495,9 @@ while true; do
     ## publish configuration
     ( motion.mqtt.pub -r -q 2 -t "$(motion.config.group)/$(motion.config.device)/start" -f "$(motion.config.file)" &> /dev/null \
       && bashio::log.info "Published configuration to MQTT; topic: $(motion.config.group)/$(motion.config.device)/start" ) \
-      || bashio::log.error "Failed to publish configuration to MQTT; config: $(motion.config.mqtt)"
+      || bashio::log.warn "Failed to publish configuration to MQTT; config: $(motion.config.mqtt)"
 
-    ## on-board devices and set CoIoT for motion sensors
+    ## fork process to on-board devices and set CoIoT for motion sensors
     # implement this code
 
     ## sleep
