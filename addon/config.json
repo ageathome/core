@@ -6,7 +6,7 @@
   "slug": "ageathome",
   "image": "dcmartin/{arch}-addon-ageathome",
   "stage": "experimental",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "arch": [
     "aarch64",
     "amd64",

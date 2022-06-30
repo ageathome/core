@@ -439,41 +439,41 @@ bashio::log.notice "Started Apache on ${MOTION_APACHE_HOST}:${MOTION_APACHE_PORT
 ## reload Home Assistant iff requested and necessary
 addon::reload
 
-if [ ! -d /data/motion-ai ]; then
+if [ ! -d /share/motion-ai ]; then
   bashio::log.info "Cloning motion-ai"
-  git clone http://github.com/dcmartin/motion-ai /data/motion-ai 2>&1 /dev/null
+  git clone http://github.com/dcmartin/motion-ai /share/motion-ai 2>&1 /dev/null
 else
-  pushd /data/motion-ai 2>&1 /dev/null
+  pushd /share/motion-ai 2>&1 /dev/null
   bashio::log.info "Pulling motion-ai"
   git pull 2>&1 /dev/null
   popd 2>&1 /dev/null
 fi
 
-if [ ! -d /data/ageathome ]; then
+if [ ! -d /share/ageathome ]; then
   bashio::log.info "Cloning ageathome"
-  git clone http://github.com/ageathome/core /data/ageathome 2>&1 /dev/null
+  git clone http://github.com/ageathome/core /share/ageathome 2>&1 /dev/null
 else
-  pushd /data/ageathome 2>&1 /dev/null
-  if [ ! -e motion-ai ] && [ -d /data/motion-ai ]; then
+  pushd /share/ageathome 2>&1 /dev/null
+  if [ ! -e motion-ai ] && [ -d /share/motion-ai ]; then
     bashio::log.info "Linking motion-ai"
-    ln -s /data/motion-ai .
+    ln -s /share/motion-ai .
   else
-    bashio::log.error "Did not find /data/motion-ai"
+    bashio::log.error "Did not find /share/motion-ai"
   fi
   bashio::log.info "Pulling ageathome"
   git pull 2>&1 /dev/null
   popd 2>&1 /dev/null
 fi
 
-if [ -d /data/ageathome/homeassistant ]; then
-  pushd /data/ageathome/homeassistant 2>&1 /dev/null
+if [ -d /share/ageathome/homeassistant ]; then
+  pushd /share/ageathome/homeassistant 2>&1 /dev/null
   bashio::log.info "Building ageathome"
   PACKAGES= make 2>&1 /dev/null
   bashio::log.info "Updatting config"
   tar chf - . | ( cd /config ; tar xf - )
   popd 2>&1 /dev/null
 else
-  bashio::log.error "Cannot find directory: /data/ageathome/homeassistant"
+  bashio::log.error "Cannot find directory: /share/ageathome/homeassistant"
 fi
 
 ## forever
