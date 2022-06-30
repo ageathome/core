@@ -13,9 +13,10 @@ window.onload = function () {
   site = site[0];
 
   cid = document.getElementById("ip");
-  cid.href = site;
+  cid.innerHTML = site;
+
   cid = document.getElementById("url");
-  cid.href = prot + "//" + site + ":7999/";
+  cid.innerHTML = prot + "//" + site + ":7999/";
 
   cid = document.getElementById("test");
   cid.href = prot + "//" + site + ":7999/cgi-bin/test";
@@ -50,12 +51,12 @@ window.onload = function () {
 </ul>
 
 <ul>
-<li><a id="test" href=""><b>Test</b>: <code>test</code></a><div id="test"></div></li>
-<li><a id="config" href="">Add-on <i>configuration</i>: <code>config</code></a><div id="config"></div></li>
-<li><a id="options" href="">Add-on <i>options</i>: <code>options</code></a><div id="options"></div></li>
-<li><a id="status" href="">Add-on <i>status</i>: <code>status</code></a><div id="status"></div></li>
-<li><a id="storage" href="">Device storage: <code>storage</code></a><div id="storage"></div></li>
-<li><a id="rtsp" href="">Local cameras (RTSP): <code>rtsp</code></a><div id="rtsp"></div></li>
+<li><a id="test" href=""><b>Test</b></a>: <code>test</code><div id="test"></div></li>
+<li><a id="config" href="">Add-on <i>configuration</i></a>: <code>config</code><div id="config"></div></li>
+<li><a id="options" href="">Add-on <i>options</i></a>: <code>options</code><div id="options"></div></li>
+<li><a id="status" href="">Add-on <i>status</i></a>: <code>status</code><div id="status"></div></li>
+<li><a id="storage" href="">Device storage</a>: <code>storage</code><div id="storage"></div></li>
+<li><a id="rtsp" href="">Local cameras (RTSP)</a>: <code>rtsp</code><div id="rtsp"></div></li>
 </ul>
 </ul>
 
