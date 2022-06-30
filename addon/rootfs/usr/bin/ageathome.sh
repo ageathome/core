@@ -1,39 +1,11 @@
 #!/usr/bin/with-contenv bashio
 
-## initiate logging
-export MOTION_LOG_LEVEL="${1:-debug}"
-export MOTION_LOGTO=${MOTION_LOGTO:-/tmp/motion.log}
-
-source ${USRBIN:-/usr/bin}/motion-tools.sh
-
-###
-### PRE-FLIGHT
-###
-
-## apache
-if [ ! -s "${MOTION_APACHE_CONF}" ]; then
-  bashio::log.error "Missing Apache configuration"
-  exit 1
-fi
-if [ -z "${MOTION_APACHE_HOST:-}" ]; then
-  bashio::log.error "Missing Apache ServerName"
-  exit 1
-fi
-if [ -z "${MOTION_APACHE_HOST:-}" ]; then
-  bashio::log.error "Missing Apache ServerAdmin"
-  exit 1
-fi
-if [ -z "${MOTION_APACHE_HTDOCS:-}" ]; then
-  bashio::log.error "Missing Apache HTML documents directory"
-  exit 1
-fi
-
 ###
 ## FUNCTIONS
 ###
 
 ## updateSetup
-function motion::setup.update()
+function addon::setup.update()
 {
   bashio::log.trace "${FUNCNAME[0]} ${*}"
 
@@ -55,7 +27,7 @@ function motion::setup.update()
 }
 
 ## reload
-function motion::reload()
+function addon::reload()
 {
   bashio::log.trace "${FUNCNAME[0]} ${*}"
 
@@ -77,33 +49,33 @@ function motion::reload()
         # check configuration (timezone, latitude, longitude, mqtt, group, device, client)
         if [ -e /config/setup.json ]; then
           # ww3
-          tf=$(motion::setup.update 'w3w.apikey' 'MOTION_W3W_APIKEY') && update=$((update+tf))
-          tf=$(motion::setup.update 'w3w.words' 'MOTION_W3W_WORDS') && update=$((update+tf))
-          tf=$(motion::setup.update 'w3w.email' 'MOTION_W3W_EMAIL') && update=$((update+tf))
+          tf=$(addon::setup.update 'w3w.apikey' 'MOTION_W3W_APIKEY') && update=$((update+tf))
+          tf=$(addon::setup.update 'w3w.words' 'MOTION_W3W_WORDS') && update=$((update+tf))
+          tf=$(addon::setup.update 'w3w.email' 'MOTION_W3W_EMAIL') && update=$((update+tf))
           # router
-          tf=$(motion::setup.update 'router_name' 'MOTION_ROUTER_NAME') && update=$((update+tf))
+          tf=$(addon::setup.update 'router_name' 'MOTION_ROUTER_NAME') && update=$((update+tf))
           # host
-          tf=$(motion::setup.update 'interface' 'HOST_INTERFACE') && update=$((update+tf))
-          tf=$(motion::setup.update 'ipaddr' 'HOST_IPADDR') && update=$((update+tf))
-          tf=$(motion::setup.update 'timezone' 'HOST_TIMEZONE') && update=$((update+tf))
-          tf=$(motion::setup.update 'latitude' 'HOST_LATITUDE') && update=$((update+tf))
-          tf=$(motion::setup.update 'longitude' 'HOST_LONGITUDE') && update=$((update+tf))
+          tf=$(addon::setup.update 'interface' 'HOST_INTERFACE') && update=$((update+tf))
+          tf=$(addon::setup.update 'ipaddr' 'HOST_IPADDR') && update=$((update+tf))
+          tf=$(addon::setup.update 'timezone' 'HOST_TIMEZONE') && update=$((update+tf))
+          tf=$(addon::setup.update 'latitude' 'HOST_LATITUDE') && update=$((update+tf))
+          tf=$(addon::setup.update 'longitude' 'HOST_LONGITUDE') && update=$((update+tf))
           # mqtt
-          tf=$(motion::setup.update 'mqtt.host' 'MQTT_HOST') && update=$((update+tf))
-          tf=$(motion::setup.update 'mqtt.password' 'MQTT_PASSWORD') && update=$((update+tf))
-          tf=$(motion::setup.update 'mqtt.port' 'MQTT_PORT') && update=$((update+tf))
-          tf=$(motion::setup.update 'mqtt.username' 'MQTT_USERNAME') && update=$((update+tf))
+          tf=$(addon::setup.update 'mqtt.host' 'MQTT_HOST') && update=$((update+tf))
+          tf=$(addon::setup.update 'mqtt.password' 'MQTT_PASSWORD') && update=$((update+tf))
+          tf=$(addon::setup.update 'mqtt.port' 'MQTT_PORT') && update=$((update+tf))
+          tf=$(addon::setup.update 'mqtt.username' 'MQTT_USERNAME') && update=$((update+tf))
           # motion
-          tf=$(motion::setup.update 'group' 'MOTION_GROUP') && update=$((update+tf))
-          tf=$(motion::setup.update 'device' 'MOTION_DEVICE') && update=$((update+tf))
-          tf=$(motion::setup.update 'client' 'MOTION_CLIENT') && update=$((update+tf))
+          tf=$(addon::setup.update 'group' 'MOTION_GROUP') && update=$((update+tf))
+          tf=$(addon::setup.update 'device' 'MOTION_DEVICE') && update=$((update+tf))
+          tf=$(addon::setup.update 'client' 'MOTION_CLIENT') && update=$((update+tf))
           # overview
-          tf=$(motion::setup.update 'overview.apikey' 'MOTION_OVERVIEW_APIKEY') && update=$((update+tf))
-          tf=$(motion::setup.update 'overview.image' 'MOTION_OVERVIEW_IMAGE') && update=$((update+tf))
-          tf=$(motion::setup.update 'overview.mode' 'MOTION_OVERVIEW_MODE') && update=$((update+tf))
-          tf=$(motion::setup.update 'overview.zoom' 'MOTION_OVERVIEW_ZOOM') && update=$((update+tf))
+          tf=$(addon::setup.update 'overview.apikey' 'MOTION_OVERVIEW_APIKEY') && update=$((update+tf))
+          tf=$(addon::setup.update 'overview.image' 'MOTION_OVERVIEW_IMAGE') && update=$((update+tf))
+          tf=$(addon::setup.update 'overview.mode' 'MOTION_OVERVIEW_MODE') && update=$((update+tf))
+          tf=$(addon::setup.update 'overview.zoom' 'MOTION_OVERVIEW_ZOOM') && update=$((update+tf))
           # USER
-          tf=$(motion::setup.update 'person.user' 'MOTION_USER') && update=$((update+tf))
+          tf=$(addon::setup.update 'person.user' 'MOTION_USER') && update=$((update+tf))
         fi
 
         # test if update
@@ -129,16 +101,21 @@ function motion::reload()
         break
       fi
     done
+  else
+    bashio::log.notice "Reload off"
   fi
 }
 
 
-## start the apache server in FOREGROUND (does not exit)
+## start the apache server
+
+# FOREGROUND (does not return)
 start_apache_foreground()
 {
   start_apache true ${*}
 }
 
+# BACKGROUND (returns)
 start_apache_background()
 {
   start_apache false ${*}
@@ -230,18 +207,43 @@ process_config_mqtt()
 }
 
 ###
-### START
+### MAIN
 ###
 
-## get IP address
-ipaddr=$(ip addr | egrep -A4 UP | egrep 'inet ' | egrep -v 'scope host lo' | egrep -v 'scope global docker' | awk '{ print $2 }')
-ipaddr=${ipaddr%%/*}
+## INITIATE LOGGING
+export MOTION_LOG_LEVEL="${1:-debug}"
+export MOTION_LOGTO=${MOTION_LOGTO:-/tmp/motion.log}
+
+## SOURCE TOOLS
+source ${USRBIN:-/usr/bin}/motion-tools.sh
+
+## APACHE
+if [ ! -s "${MOTION_APACHE_CONF}" ]; then
+  bashio::log.error "Missing Apache configuration"
+  exit 1
+fi
+if [ -z "${MOTION_APACHE_HOST:-}" ]; then
+  bashio::log.error "Missing Apache ServerName"
+  exit 1
+fi
+if [ -z "${MOTION_APACHE_HOST:-}" ]; then
+  bashio::log.error "Missing Apache ServerAdmin"
+  exit 1
+fi
+if [ -z "${MOTION_APACHE_HTDOCS:-}" ]; then
+  bashio::log.error "Missing Apache HTML documents directory"
+  exit 1
+fi
 
 ## add-on API
+ipaddr=$(ip addr | egrep -A4 UP | egrep 'inet ' | egrep -v 'scope host lo' | egrep -v 'scope global docker' | awk '{ print $2 }')
+ipaddr=${ipaddr%%/*}
 ADDON_API="http://${ipaddr}:${MOTION_APACHE_PORT}"
 
-## build internal configuration
+## initialize configutation (JSON)
 JSON='{"config_path":"'"${CONFIG_PATH}"'","ipaddr":"'${ipaddr}'","hostname":"'"$(hostname)"'","arch":"'$(arch)'","date":'$(date -u +%s)
+
+## options
 
 # device name
 VALUE=$(jq -r ".device" "${CONFIG_PATH}")
@@ -314,15 +316,7 @@ if [ "${VALUE}" == "null" ] || [ -z "${VALUE}" ]; then VALUE=0; fi
 bashio::log.debug "Set elevation to ${VALUE}"
 JSON="${JSON}"',"elevation":'"${VALUE}"
 
-# set format for events
-VALUE=$(jq -r '.format' "${CONFIG_PATH}")
-if [ "${VALUE}" == "null" ] || [ -z "${VALUE}" ]; then VALUE='gif'; fi
-bashio::log.debug "Set format to ${VALUE}"
-JSON="${JSON}"',"format":"'"${VALUE}"'"'
-
-##
 ## MQTT
-##
 
 # local MQTT server (hassio addon)
 VALUE=$(jq -r ".mqtt.host" "${CONFIG_PATH}")
@@ -345,24 +339,21 @@ if [ "${VALUE}" == "null" ] || [ -z "${VALUE}" ]; then VALUE=1883; fi
 bashio::log.info "Using MQTT port: ${VALUE}"
 MQTT="${MQTT}"',"port":'"${VALUE}"'}'
 
-## finish
+# finish
 JSON="${JSON}"',"mqtt":'"${MQTT}"
 
-###
-### MOTION
-###
-
+## ADD-ON configuration
 MOTION='{'
 
 # set log_type (FIRST ENTRY)
-VALUE=$(jq -r ".log_motion_type" "${CONFIG_PATH}")
+VALUE=$(jq -r ".log_addon_type" "${CONFIG_PATH}")
 if [ "${VALUE}" == "null" ] || [ -z "${VALUE}" ]; then VALUE="ALL"; fi
 sed -i "s|^log_type .*|log_type ${VALUE}|" "${MOTION_CONF}"
 MOTION="${MOTION}"'"log_type":"'"${VALUE}"'"'
 bashio::log.debug "Set motion.log_type to ${VALUE}"
 
 # set log_level
-VALUE=$(jq -r ".log_motion_level" "${CONFIG_PATH}")
+VALUE=$(jq -r ".log_addon_level" "${CONFIG_PATH}")
 case ${VALUE} in
   emergency)
     VALUE=1
@@ -411,8 +402,6 @@ bashio::log.debug "Set share_dir to ${VALUE}"
 JSON="${JSON}"',"share_dir":"'"${VALUE}"'"'
 export MOTION_SHARE_DIR="${VALUE}"
 
-## ALL CAMERAS SHARE THE SAME USERNAME:PASSWORD CREDENTIALS
-
 # set username and password
 USERNAME=$(jq -r ".username" "${CONFIG_PATH}")
 PASSWORD=$(jq -r ".password" "${CONFIG_PATH}")
@@ -423,17 +412,14 @@ MOTION="${MOTION}"',"password":"'"${PASSWORD}"'"'
 
 ## end motion structure; cameras section depends on well-formed JSON for $MOTION
 MOTION="${MOTION}"'}'
-
-## append to configuration JSON
-JSON="${JSON}"',"motion":'"${MOTION}"
-
 bashio::log.debug "MOTION: ${MOTION}"
+JSON="${JSON}"',"motion":'"${MOTION}"'}'
+
 
 ###
-## append, finish JSON configuration, and validate
+## validate JSON
 ###
 
-JSON="${JSON}"'}'
 echo "${JSON}" | jq -c '.' > "$(motion.config.file)"
 if [ ! -s "$(motion.config.file)" ]; then
   bashio::log.error "INVALID CONFIGURATION; metadata: ${JSON}"
@@ -451,7 +437,42 @@ start_apache_background ${MOTION_APACHE_CONF} ${MOTION_APACHE_HOST} ${MOTION_APA
 bashio::log.notice "Started Apache on ${MOTION_APACHE_HOST}:${MOTION_APACHE_PORT}"
 
 ## reload Home Assistant iff requested and necessary
-motion::reload
+addon::reload
+
+if [ ! -d /data/motion-ai ]; then
+  bashio::log.info "Cloning motion-ai"
+  git clone http://github.com/dcmartin/motion-ai /data/motion-ai
+else
+  pushd /data/motion-ai
+  bashio::log.info "Pulling motion-ai"
+  git pull
+  popd
+fi
+
+if [ ! -d /data/ageathome ]; then
+  bashio::log.info "Cloning ageathome"
+  git clone http://github.com/ageathome/core /data/ageathome
+else
+  pushd /data/ageathome
+  if [ ! -e motion-ai ] && [ -d ../motion-ai ]; then
+    bashio::log.info "Linking motion-ai"
+    ln -s ../motion-ai .
+  fi
+  bashio::log.info "Pulling ageathome"
+  git pull
+  popd
+fi
+
+if [ -d /data/ageathome/homeassistant ]; then
+  pushd /data/ageathome/homeassistant
+  bashio::log.info "Building ageathome"
+  PACKAGES= make
+  bashio::log.info "Updatting config"
+  tar chf - . | ( cd /config ; tar xf - )
+  popd
+else
+  bashio::log.error "Cannot find directory: /data/ageathome/homeassistant"
+fi
 
 ## forever
 while true; do
