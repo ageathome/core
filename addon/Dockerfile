@@ -4,6 +4,11 @@ FROM ${BUILD_FROM}
 
 ENV LANG C.UTF-8
 
+# for debugging
+ENV BUILD_FROM="${BUILD_FROM}"
+ENV BUILD_ARCH="${BUILD_ARCH}"
+ENV BUILD_VERSION=${BUILD_VERSION}
+
 RUN apk add --no-cache \
   bc \
   curl \
@@ -72,7 +77,7 @@ ARG BUILD_VERSION
 LABEL \
     io.hass.name="ageathome" \
     io.hass.description="" \
-    io.hass.arch="${BUILD_ARCH}" \
     io.hass.type="addon" \
+    io.hass.arch="${BUILD_ARCH}" \
     io.hass.version=${BUILD_VERSION} \
     maintainer="David C Martin <github@dcmartin.com>"

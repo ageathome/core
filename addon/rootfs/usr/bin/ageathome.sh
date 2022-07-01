@@ -236,7 +236,7 @@ ipaddr=${ipaddr%%/*}
 ADDON_API="http://${ipaddr}:${MOTION_APACHE_PORT}"
 
 ## initialize configutation (JSON)
-JSON='{"config_path":"'"${CONFIG_PATH}"'","ipaddr":"'${ipaddr}'","hostname":"'"$(hostname)"'","arch":"'$(arch)'","date":'$(date -u +%s)
+JSON='{"build_version":"'"${BUILD_VERSION}"'","build_from":"'"${BUILD_FROM}"'","build_arch":"'"${BUILD_ARCH}"'","config_path":"'"${CONFIG_PATH}"'","ipaddr":"'${ipaddr}'","hostname":"'"$(hostname)"'","arch":"'$(arch)'","date":'$(date -u +%s)
 
 ## options
 
