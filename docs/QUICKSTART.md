@@ -47,24 +47,5 @@ Start the add-on by clicking `START` on the lower-left.  After a few momenets th
 <img width="50%" src='ageathome-started.png'>
 
 ## 4. Reboot
-Once the Age@Home add-on has completed initialization the hub requires a reboot.  The simplest way is to unplug the hub and plug it back in; alternatively navigate to [](http://homeassistant.local:8123/)
+Once the Age@Home add-on has completed initialization the hub requires a reboot.  The simplest way is to unplug the hub and plug it back in; alternatively navigate to [settings](http://homeassistant.local:8123/lovelace-owner/settings) and click the button for "Reboot" as in the image below:
 
-
-
-## Commands
-Here there be dragons.
-
-```
-git clone http://github.com/dcmartin/motion-ai /share/motion-ai
-git clone http://github.com/ageathome/core /share/ageathome
-cd /share/ageathome
-ln -s /share/motion-ai .
-apk add make gettext sudo
-```
-
-```
-cd /share/ageathome/homeassistant
-PACKAGES= make
-tar chf - . | ( cd /config ; tar xf - )
-ha core restart
-```

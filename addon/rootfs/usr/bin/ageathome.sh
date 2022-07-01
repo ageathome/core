@@ -32,7 +32,7 @@ function addon::reload()
 {
   bashio::log.trace "${FUNCNAME[0]} ${*}"
 
-  if [ $(bashio::config 'reload') = 'true' ]; then
+  if [ $(bashio::config 'reload') != 'false' ] && [ -e /config/setup.json ]; then
     local update=0
     local date='null'
     local i=2
@@ -96,8 +96,10 @@ function addon::reload()
         break
       fi
     done
-  else
-    bashio::log.notice "Reload off"
+  elif [ ! -e /config/setup.json ]; then
+    bashio::log.notice "Did not find /config/setup.json"
+  else 
+    bashio::log.info "Reload off"
   fi
 }
 
@@ -474,7 +476,7 @@ fi
 if [ -d /share/ageathome ] && [ ! -e /config/setup.json ]; then
   bashio::log.info "Initializing /share/ageathome"
   pushd /share/ageathome &> /dev/null
-  make homeassistant/setup.json && mv homeassistant/setup.json /config
+  make homeassistant/setup.json &> /dev/null && mv homeassistant/setup.json /config
   popd &> /dev/null
 fi
 
