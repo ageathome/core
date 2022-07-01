@@ -236,7 +236,7 @@ ipaddr=${ipaddr%%/*}
 ADDON_API="http://${ipaddr}:${MOTION_APACHE_PORT}"
 
 ## initialize configutation (JSON)
-JSON='{"build_version":"'"${BUILD_VERSION:-}"'","build_from":"'"${BUILD_FROM}"'","build_arch":"'"${BUILD_ARCH}"'","config_path":"'"${CONFIG_PATH}"'","ipaddr":"'${ipaddr}'","hostname":"'"$(hostname)"'","arch":"'$(arch)'","date":'$(date -u +%s)
+JSON='{"version":"'"${BUILD_VERSION:-}"'","config_path":"'"${CONFIG_PATH}"'","ipaddr":"'${ipaddr}'","hostname":"'"$(hostname)"'","arch":"'$(arch)'","date":'$(date -u +%s)
 
 ## options
 
@@ -500,7 +500,7 @@ while true; do
     ## publish configuration
     ( motion.mqtt.pub -r -q 2 -t "$(motion.config.group)/$(motion.config.device)/start" -f "$(motion.config.file)" &> /dev/null \
       && bashio::log.info "Published configuration to MQTT; topic: $(motion.config.group)/$(motion.config.device)/start" ) \
-      || bashio::log.warn "Failed to publish configuration to MQTT; config: $(motion.config.mqtt)"
+      || bashio::log.notice "Failed to publish configuration to MQTT; config: $(motion.config.mqtt)"
 
     ## sleep
     bashio::log.info "Sleeping; ${MOTION_WATCHDOG_INTERVAL:-1800} seconds ..."

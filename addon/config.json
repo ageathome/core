@@ -1,5 +1,13 @@
 {
-  "version": "0.1.12",
+  "name": "Age@Home",
+  "description": "Cognitive elder -care and -support",
+  "slug": "ageathome",
+  "stage": "experimental",
+  "startup": "services",
+  "timeout": 300,
+  "tmpfs": true,
+  "url": "https://github.com/ageathome",
+  "version": "0.1.15",
   "arch": [
     "aarch64",
     "amd64",
@@ -7,7 +15,6 @@
   ],
   "audio": false,
   "boot": "auto",
-  "description": "Cognitive elder -care and -support",
   "environment": {
     "LOG_FORMAT": "{LEVEL}: {MESSAGE}"
   },
@@ -23,7 +30,6 @@
     "share:rw",
     "config:rw"
   ],
-  "name": "Age@Home",
   "options": {
     "client": "",
     "device": "",
@@ -71,6 +77,11 @@
     "runc": true
   },
   "schema": {
+    "client": "str?",
+    "device": "str?",
+    "group": "str?",
+    "latitude": "float?",
+    "longitude": "float?",
     "elevation": "int?",
     "log_file": "str?",
     "log_level": "str",
@@ -98,12 +109,6 @@
       "words": "str?"
     }
   },
-  "slug": "ageathome",
-  "stage": "experimental",
-  "startup": "services",
-  "timeout": 300,
-  "tmpfs": true,
-  "url": "https://github.com/ageathome",
   "video": true,
   "webui": "http://[HOST]:[PORT:7999]/"
 }

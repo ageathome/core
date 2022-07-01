@@ -46,7 +46,8 @@ Start the add-on by clicking `START` on the lower-left.  After a few momenets th
 
 <img width="50%" src='ageathome-started.png'>
 
-## 4. Restart Home-Assistant
+## 4. Reboot
+Once the Age@Home add-on has completed initialization the hub requires a reboot.  The simplest way is to unplug the hub and plug it back in; alternatively navigate to [](http://homeassistant.local:8123/)
 
 
 

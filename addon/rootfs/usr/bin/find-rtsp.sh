@@ -126,7 +126,7 @@ find_rtsp()
   local ipaddr=$(lookup_ipaddr ${net:-})
   local size=${5:-${NETWORK_SIZE:-24}}
   local result
-  
+
   if [ "${ipaddr:-null}" = 'null' ]; then
     echo "No TCP/IP v4 address for this device on ${net:-any} network; please specify alternative: ${0} eth0" &> /dev/stderr
   else
@@ -137,6 +137,8 @@ find_rtsp()
 
     if [ ${#ips[@]} -gt 0 ]; then
       local rtsp
+      local cameras
+      local shelly
 
       for ip in ${ips[@]}; do
 	local dev
@@ -146,6 +148,9 @@ find_rtsp()
         if [ "${dev:-null}" != 'null' ]; then
 	  if [ $(echo "${dev}" | jq '.status!=null') = 'true' ]; then
 	    if [ "${rtsp:-null}" = 'null' ]; then rtsp='['"${dev}"; else rtsp="${rtsp},${dev}"; fi
+	    if [ $(echo "${dev}" | jq '.status=="found"') = 'true' ]; then
+	      if [ "${cameras:-null}" = 'null' ]; then cameras='['"${dev}"; else cameras="${cameras},${dev}"; fi
+            fi
           fi
         fi
         # shelly
@@ -157,9 +162,10 @@ find_rtsp()
         fi
       done
       if [ ! -z "${rtsp:-}" ]; then rtsp="${rtsp}]"; else rtsp='null'; fi
+      if [ ! -z "${cameras:-}" ]; then cameras="${cameras}]"; else cameras='null'; fi
       if [ ! -z "${shelly:-}" ]; then shelly="${shelly}]"; else shelly='null'; fi
     fi
-    result='{"nmap":{"timeout":'${nmap_timeout}',"net":"'${net}'","ipaddr":"'${ipaddr}'"},"connect":'${connect}',"max":'${maxtime}',"shelly":'"${shelly:-null}"',"devices":'"${rtsp:-null}"'}'
+    result='{"nmap":{"timeout":'${nmap_timeout}',"net":"'${net}'","ipaddr":"'${ipaddr}'"},"connect":'${connect}',"max":'${maxtime}',"cameras":'"${cameras:-null}"',"shelly":'"${shelly:-null}"',"devices":'"${rtsp:-null}"'}'
   fi
 
   echo "${result:-null}"
