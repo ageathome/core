@@ -485,7 +485,7 @@ if [ -d /share/ageathome ] && [ -d /share/motion-ai ] && [ -e /config/setup.json
   popd &> /dev/null
   bashio::log.info "Making /config"
   pushd /config &> /dev/null
-  HOST_IPADDR=${ipaddr} PACKAGES= make &> /dev/null
+  MOTION_APP="Age@Home" HOST_IPADDR="${ipaddr}" PACKAGES="" make &> /dev/null
   popd &> /dev/null
 else
   bashio::log.error "Cannot find /config/setup.json"

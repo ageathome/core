@@ -13,10 +13,10 @@ window.onload = function () {
   site = site[0];
 
   cid = document.getElementById("ip");
-  cid.innerHTML = site;
+  cid.innerHTML = "IP: <code>" + site + "</code>";
 
   cid = document.getElementById("url");
-  cid.innerHTML = prot + "//" + site + ":7999/";
+  cid.innerHTML = "API: <code>" + prot + "//" + site + ":7999/cgi-bin/</code>";
 
   cid = document.getElementById("test");
   cid.href = prot + "//" + site + ":7999/cgi-bin/test";
@@ -46,8 +46,8 @@ window.onload = function () {
 </h1>
 
 <ul>
-<li>IP: <div id="ip"></div></li>
-<li>URL: <div id="url"></div></li>
+<li><div id="ip"></div></li>
+<li><div id="url"></div></li>
 </ul>
 
 <ul>
