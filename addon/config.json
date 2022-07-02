@@ -7,7 +7,7 @@
   "timeout": 300,
   "tmpfs": true,
   "url": "https://github.com/ageathome",
-  "version": "0.2.8",
+  "version": "0.2.9",
   "arch": [
     "aarch64",
     "amd64",
@@ -89,17 +89,14 @@
       "mode": "list(local|hybrid|roadmap|satellite|terrain)?",
       "zoom": "int(10,22)?"
     },
-    "password": "str?",
     "person": "str?",
     "reload": "bool?",
-    "router_name": "str?",
     "unit_system": "list(imperial|metric)?",
-    "username": "str?",
     "w3w": {
       "apikey": "str?",
       "words": "str?"
     }
   },
-  "video": true,
+  "video": false,
   "webui": "http://[HOST]:[PORT:7999]/"
 }
