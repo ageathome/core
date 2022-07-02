@@ -195,29 +195,28 @@ function addon::config.location()
   local results
 
   if [ "${words:-null}" != 'null' ] && [ "${key:-null}" != 'null' ]; then
-     results=$(curl -ksSL "https://api.what3words.com/v3/convert-to-coordinates?words=${words}&key=${key}" 2> /dev/null)
-     if [ "${results:-null}" != 'null' ] && [ $(echo "${results}" | jq '.error!=null') != 'true' ]; then
-       # example: {"coordinates":{"lat":37.174981,"lng":-121.816223},"country":"US","language":"en","map":"https://w3w.co/gangs.lovely.gossip","nearestPlace":"Seven Trees, California","square":{"northeast":{"lat":37.174995,"lng":-121.816206},"southwest":{"lat":37.174968,"lng":-121.81624}},"words":"gangs.lovely.gossip"}
-       local lat=$(echo "${results}" | jq -r '.coordinates.lat')
-       local lng=$(echo "${results}" | jq -r '.coordinates.lng')
+    results=$(curl -ksSL "https://api.what3words.com/v3/convert-to-coordinates?words=${words}&key=${key}" 2> /dev/null)
+    if [ "${results:-null}" != 'null' ] && [ $(echo "${results}" | jq '.error!=null') != 'true' ]; then
+      local lat=$(echo "${results}" | jq -r '.coordinates.lat')
+      local lng=$(echo "${results}" | jq -r '.coordinates.lng')
 
-       if [ "${lat:-null}" != 'null' ] && [ "${lng:-null}" != 'null' ]; then
-         bashio::log.debug "Updating location with latitude=${lat}; longitude=${lng}"
-         latitude=${lat}
-         longitude=${lng}
-       else
-         bashio::log.error "No coordinates in W3W results: ${results:-null}"
-       fi
-     else
-       bashio::log.warning "No W3W results: ${results:-null}"
-     fi
-   else
-     bashio::log.warning "No W3W words or apikey: ${w3w:-null}"
-   fi
+      if [ "${lat:-null}" != 'null' ] && [ "${lng:-null}" != 'null' ]; then
+        bashio::log.debug "Updating location with latitude=${lat}; longitude=${lng}"
+        latitude=${lat}
+        longitude=${lng}
+      else
+        bashio::log.error "No coordinates in W3W results: ${results:-null}"
+      fi
+    else
+      bashio::log.warning "No W3W results: ${results:-null}"
+    fi
+  else
+    bashio::log.warning "No W3W words or apikey: ${w3w:-null}"
+  fi
   latitude=$(addon::config.option latitude ${latitude})
   longitude=$(addon::config.option longitude ${longitude})
 
-  echo '{"latitude":'${latitude:-null}',"longitude":'${longitude:-null}',"elevation":'${elevation:-null}',"apikey":"'${apikey:-}'","words":"'${words}'","results":'${results:-null}'}'
+  echo '{"latitude":'${latitude:-null}',"longitude":'${longitude:-null}',"elevation":'${elevation:-null}',"apikey":"'${key:-}'","words":"'${words}'","results":'${results:-null}'}'
 }
 
 ## mqtt
@@ -254,7 +253,7 @@ function addon::config.timezone()
   else
     bashio::log.error "No known timezone: ${timezone}"
   fi
-  echo '{"timezone":"'${timezone:-}'"}'
+  echo "${timezone:-}"
 }
 
 ## network
@@ -347,13 +346,9 @@ if [ ! -s "$(motion.config.file)" ]; then
   exit 1
 elif [ "${CONFIG:-null}" == 'null' ]; then
   bashio::log.warning "No configuration"
+else
+  bashio::log.info "${CONFIG:-}"
 fi
-
-###
-# reload configuration
-###
-
-addon::setup.reload
 
 ###
 # start Apache
@@ -376,10 +371,18 @@ if [ -z "${MOTION_APACHE_HTDOCS:-}" ]; then
   exit 1
 fi
 
-
 start_apache_background ${MOTION_APACHE_CONF} ${MOTION_APACHE_HOST} ${MOTION_APACHE_PORT}
 bashio::log.notice "Started Apache on ${MOTION_APACHE_HOST}:${MOTION_APACHE_PORT}"
 
+###
+# reload configuration
+###
+
+addon::setup.reload
+
+###
+# download YAML, etc..
+###
 
 if [ ! -d /share/motion-ai ]; then
   bashio::log.info "Cloning /share/motion-ai"
@@ -425,7 +428,7 @@ if [ -d /share/ageathome ] && [ -d /share/motion-ai ] && [ -e /config/setup.json
   popd &> /dev/null
   bashio::log.info "Making /config"
   pushd /config &> /dev/null
-  MOTION_APP="Age@Home" HOST_IPADDR="${ipaddr}" PACKAGES="" make &> /dev/null
+  MOTION_APP="Age@Home" HOST_IPADDR="$(echo "${CONFIG:-null}" | jq -r '.network.ip')" PACKAGES="" make &> /dev/null
   popd &> /dev/null
 else
   bashio::log.error "Cannot find /config/setup.json"
