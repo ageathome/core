@@ -1,10 +1,7 @@
 #!/usr/bin/with-contenv bashio
 
-###
-## FUNCTIONS
-###
+### setup
 
-## updateSetup
 function addon::setup.update()
 {
   bashio::log.trace "${FUNCNAME[0]} ${*}"
@@ -12,10 +9,9 @@ function addon::setup.update()
   local c="${1:-}"
   local e="${2:-}"
   local update
-  local path="/config/setup.json"
 
-  old="$(jq -r '.'"${e}"'?' ${path})"
-  new=$(jq -r '.'"${c}"'?' "/data/options.json")
+  old=$(jq -r '.'"${e}"'?' /config/setup.json)
+  new=$(jq -r '.'"${c}"'?' $(motion.config.file))
 
   if [ "${new:-null}" != 'null' ] &&  [ "${old:-}" != "${new:-}" ]; then
     jq -c '.timestamp="'$(date -u '+%FT%TZ')'"|.'"${e}"'="'"${new}"'"' /config/setup.json > /tmp/setup.json.$$ && mv -f /tmp/setup.json.$$ /config/setup.json
@@ -27,8 +23,7 @@ function addon::setup.update()
   echo ${update:-0}
 }
 
-## reload
-function addon::reload()
+function addon::setup.reload()
 {
   bashio::log.trace "${FUNCNAME[0]} ${*}"
 
@@ -103,16 +98,13 @@ function addon::reload()
   fi
 }
 
+### apache
 
-## start the apache server
-
-# FOREGROUND (does not return)
 start_apache_foreground()
 {
   start_apache true ${*}
 }
 
-# BACKGROUND (returns)
 start_apache_background()
 {
   start_apache false ${*}
@@ -156,6 +148,9 @@ start_apache()
   # make /run/apache2 for PID file
   mkdir -p /run/apache2
 
+  # make the add-on options available to the apache client
+  chmod go+rx /data /data/options.json
+
   # start HTTP daemon
   bashio::log.debug "Starting Apache: ${conf} ${host} ${port}"
 
@@ -166,41 +161,167 @@ start_apache()
   fi
 }
 
-## mqtt
-process_config_mqtt()
+###
+# configuration functions
+###
+
+function addon::config.option()
 {
-  bashio::log.trace "${FUNCNAME[0]}" "${*}"
+  bashio::log.trace "${FUNCNAME[0]} ${*}"
 
-  local config="${*}"
-  local result=
-  local value
-  local json
+  local e="${1:-}"
+  local d="${2:-}"
+  local VALUE=$(bashio::config "${e}") 
 
-  # local json server (hassio addon)
-  value=$(echo "${config}" | jq -r ".host")
-  if [ "${value}" == "null" ] || [ -z "${value}" ]; then value="core-mosquitto"; fi
-  bashio::log.info "Using MQTT host: ${value}"
-  json='{"host":"'"${value}"'"'
+  if [ -z "${VALUE}" ] || [ "${VALUE}" == "null" ]; then VALUE="${d}"; fi
+  jq -c '.'"${e}"'="'"${VALUE}"'"' $(motion.config.file) > /tmp/$$.json \
+    && mv -f /tmp/$$.json $(motion.config.file) \
+    || bashio::log.error "Unable to update ${e} in $(motion.config.file)"
 
-  # username
-  value=$(echo "${config}" | jq -r ".username")
-  if [ "${value}" == "null" ] || [ -z "${value}" ]; then value=""; fi
-  bashio::log.info "Using MQTT username: ${value}"
-  json="${json}"',"username":"'"${value}"'"'
+  echo "${VALUE:-}"
+}
 
-  # password
-  value=$(echo "${config}" | jq -r ".password")
-  if [ "${value}" == "null" ] || [ -z "${value}" ]; then value=""; fi
-  bashio::log.info "Using MQTT password: ${value}"
-  json="${json}"',"password":"'"${value}"'"'
+## location
 
-  # port
-  value=$(echo "${config}" | jq -r ".port")
-  if [ "${value}" == "null" ] || [ -z "${value}" ]; then value=1883; fi
-  bashio::log.info "Using MQTT port: ${value}"
-  json="${json}"',"port":'"${value}"'}'
+function addon::config.location()
+{
+  bashio::log.trace "${FUNCNAME[0]} ${*}"
 
-  echo "${json:-null}"
+  local elevation=$(addon::config.option elevation 0)
+  local words=$(addon::config.option w3w.words "///what.three.words")
+  local key=$(addon::config.option w3w.apikey "")
+  local latitude=$(addon::config.option latitude 0)
+  local longitude=$(addon::config.option longitude 0)
+  local results
+
+  if [ "${words:-null}" != 'null' ] && [ "${key:-null}" != 'null' ]; then
+     results=$(curl -ksSL "https://api.what3words.com/v3/convert-to-coordinates?words=${words}&key=${key}" 2> /dev/null)
+     if [ "${results:-null}" != 'null' ] && [ $(echo "${results}" | jq '.error!=null') != 'true' ]; then
+       # example: {"coordinates":{"lat":37.174981,"lng":-121.816223},"country":"US","language":"en","map":"https://w3w.co/gangs.lovely.gossip","nearestPlace":"Seven Trees, California","square":{"northeast":{"lat":37.174995,"lng":-121.816206},"southwest":{"lat":37.174968,"lng":-121.81624}},"words":"gangs.lovely.gossip"}
+       local lat=$(echo "${results}" | jq -r '.coordinates.lat')
+       local lng=$(echo "${results}" | jq -r '.coordinates.lng')
+
+       if [ "${lat:-null}" != 'null' ] && [ "${lng:-null}" != 'null' ]; then
+         bashio::log.debug "Updating location with latitude=${lat}; longitude=${lng}"
+         latitude=${lat}
+         longitude=${lng}
+       else
+         bashio::log.error "No coordinates in W3W results: ${results:-null}"
+       fi
+     else
+       bashio::log.warning "No W3W results: ${results:-null}"
+     fi
+   else
+     bashio::log.warning "No W3W words or apikey: ${w3w:-null}"
+   fi
+  latitude=$(addon::config.option latitude ${latitude})
+  longitude=$(addon::config.option longitude ${longitude})
+
+  echo '{"latitude":'${latitude:-null}',"longitude":'${longitude:-null}',"elevation":'${elevation:-null}',"apikey":"'${apikey:-}'","words":"'${words}'","results":'${results:-null}'}'
+}
+
+## mqtt
+
+function addon::config.mqtt()
+{
+  bashio::log.trace "${FUNCNAME[0]} ${*}"
+
+  local VALUE=$(bashio::config "mqtt.host") 
+  local network="${1:-}"
+  local ip=$(echo "${network:-null}" | jq -r '.ip?')
+
+  if [ "${VALUE:-null}" == 'null' ]; then VALUE="${ip}"; fi
+
+  local host=$(addon::config.option mqtt.host "${VALUE}")
+  local port=$(addon::config.option mqtt.port 1883)
+  local username=$(addon::config.option mqtt.username username)
+  local password=$(addon::config.option mqtt.password password)
+
+  echo '{"host":"'${host:-}'","port":'${port:-null}',"username":"'${username:-}'","password":"'${password:-}'"}'
+}
+
+## timezone
+
+function addon::config.timezone()
+{
+  bashio::log.trace "${FUNCNAME[0]} ${*}"
+
+  local timezone=$(addon::config.option timezone "GMT")
+
+  if [ -s "/usr/share/zoneinfo/${timezone}" ]; then
+    cp /usr/share/zoneinfo/${timezone} /etc/localtime
+    echo "${timezone}" > /etc/timezone
+  else
+    bashio::log.error "No known timezone: ${timezone}"
+  fi
+  echo '{"timezone":"'${timezone:-}'"}'
+}
+
+## network
+
+function addon::config.network()
+{
+  bashio::log.trace "${FUNCNAME[0]} ${*}"
+  local ipaddr=$(ip addr \
+                 | egrep -A4 UP \
+                 | egrep 'inet ' \
+                 | egrep -v 'scope host lo' \
+                 | egrep -v 'scope global docker' \
+                 | awk '{ print $2 }')
+
+  jq -c '.ipaddr="'${ipaddr%%/*}'"' $(motion.config.file) > /tmp/$$.json \
+    && mv -f /tmp/$$.json $(motion.config.file) \
+    || bashio::log.error "Unable to update $(motion.config.file)"
+
+  export ADDON_API="http://${ipaddr%%/*}:${MOTION_APACHE_PORT}"
+  echo '{"ip":"'${ipaddr%%/*}'"}'
+}
+
+# options
+
+function addon::config.options()
+{
+  bashio::log.trace "${FUNCNAME[0]} ${*}"
+  local device=$(addon::config.option device "$(hostname -s)")
+  local unit_system=$(addon::config.option unit_system "imperial")
+  local group=$(addon::config.option group "motion")
+  local client=$(addon::config.option client "+")
+  local share_dir=$(addon::config.option share_dir "/share/${group:-motion}")
+
+  echo '{"device":"'${device:-}'","unit_system":"'${unit_system:-}'","share_dir":"'${share_dir:-}'","group":"'${group:-}'","client":"'${client:-}'"}'
+}
+
+# init
+
+function addon::config.init()
+{
+  bashio::log.trace "${FUNCNAME[0]} ${*}"
+
+  local json='{"version":"'"${BUILD_VERSION:-}"'","config_path":"'"${CONFIG_PATH}"'","hostname":"'"$(hostname)"'","arch":"'$(arch)'","date":'$(date -u +%s)'}'
+
+  echo "${json}" | jq -Sc '.' > $(motion.config.file)
+}
+
+## config
+
+function addon::config()
+{
+  bashio::log.trace "${FUNCNAME[0]} ${*}"
+
+  local init=$(addon::config.init)
+  local network
+  local timezone
+  local location
+  local mqtt
+  local options
+
+  network=$(addon::config.network)
+  timezone=$(addon::config.timezone)
+  location=$(addon::config.location)
+  mqtt=$(addon::config.mqtt "${network:-}")
+  options=$(addon::config.options)
+
+  echo '{"network":'${network:-null}',"timezone":"'${timezone:-}'","location":'${location:-null}',"mqtt":'${mqtt:-null}',"options":'${options:-null}'}'
 }
 
 ###
@@ -208,13 +329,36 @@ process_config_mqtt()
 ###
 
 ## INITIATE LOGGING
+
 export MOTION_LOG_LEVEL="${1:-debug}"
 export MOTION_LOGTO=${MOTION_LOGTO:-/tmp/motion.log}
 
 ## SOURCE TOOLS
+
 source ${USRBIN:-/usr/bin}/motion-tools.sh
 
-## APACHE
+###
+## configuration
+###
+
+CONFIG=$(addon::config)
+if [ ! -s "$(motion.config.file)" ]; then
+  bashio::log.error "Cannot find file: $(motion.config.file)"
+  exit 1
+elif [ "${CONFIG:-null}" == 'null' ]; then
+  bashio::log.warning "No configuration"
+fi
+
+###
+# reload configuration
+###
+
+addon::setup.reload
+
+###
+# start Apache
+###
+
 if [ ! -s "${MOTION_APACHE_CONF}" ]; then
   bashio::log.error "Missing Apache configuration"
   exit 1
@@ -232,216 +376,10 @@ if [ -z "${MOTION_APACHE_HTDOCS:-}" ]; then
   exit 1
 fi
 
-## add-on API
-ipaddr=$(ip addr | egrep -A4 UP | egrep 'inet ' | egrep -v 'scope host lo' | egrep -v 'scope global docker' | awk '{ print $2 }')
-ipaddr=${ipaddr%%/*}
-ADDON_API="http://${ipaddr}:${MOTION_APACHE_PORT}"
 
-## initialize configutation (JSON)
-JSON='{"version":"'"${BUILD_VERSION:-}"'","config_path":"'"${CONFIG_PATH}"'","ipaddr":"'${ipaddr}'","hostname":"'"$(hostname)"'","arch":"'$(arch)'","date":'$(date -u +%s)
-
-## options
-
-# device name
-VALUE=$(jq -r ".device" "${CONFIG_PATH}")
-if [ -z "${VALUE}" ] || [ "${VALUE}" == "null" ]; then
-  VALUE="$(hostname -s)"
-fi
-JSON="${JSON}"',"device":"'"${VALUE}"'"'
-bashio::log.info "MOTION_DEVICE: ${VALUE}"
-MOTION_DEVICE="${VALUE}"
-
-# device group
-VALUE=$(jq -r ".group" "${CONFIG_PATH}")
-if [ -z "${VALUE}" ] || [ "${VALUE}" == "null" ]; then
-  VALUE="motion"
-fi
-JSON="${JSON}"',"group":"'"${VALUE}"'"'
-bashio::log.info "MOTION_GROUP: ${VALUE}"
-MOTION_GROUP="${VALUE}"
-
-# client
-VALUE=$(jq -r ".client" "${CONFIG_PATH}")
-if [ -z "${VALUE}" ] || [ "${VALUE}" == "null" ]; then
-  VALUE="+"
-fi
-JSON="${JSON}"',"client":"'"${VALUE}"'"'
-bashio::log.info "MOTION_CLIENT: ${VALUE}"
-MOTION_CLIENT="${VALUE}"
-
-## time zone
-VALUE=$(jq -r ".timezone" "${CONFIG_PATH}")
-# Set the correct timezone
-if [ -z "${VALUE}" ] || [ "${VALUE}" == "null" ]; then
-  VALUE="GMT"
-else
-  bashio::log.info "TIMEZONE: ${VALUE}"
-fi
-if [ -s "/usr/share/zoneinfo/${VALUE}" ]; then
-  cp /usr/share/zoneinfo/${VALUE} /etc/localtime
-  echo "${VALUE}" > /etc/timezone
-else
-  bashio::log.error "No known timezone: ${VALUE}"
-fi
-JSON="${JSON}"',"timezone":"'"${VALUE}"'"'
-
-# set unit_system for events
-VALUE=$(jq -r '.unit_system' "${CONFIG_PATH}")
-if [ "${VALUE}" == "null" ] || [ -z "${VALUE}" ]; then VALUE="imperial"; fi
-bashio::log.debug "Set unit_system to ${VALUE}"
-JSON="${JSON}"',"unit_system":"'"${VALUE}"'"'
-
-# set latitude for events
-VALUE=$(jq -r '.latitude' "${CONFIG_PATH}")
-if [ "${VALUE}" == "null" ] || [ -z "${VALUE}" ]; then VALUE=0.0; fi
-bashio::log.debug "Set latitude to ${VALUE}"
-JSON="${JSON}"',"latitude":'"${VALUE}"
-
-# set longitude for events
-VALUE=$(jq -r '.longitude' "${CONFIG_PATH}")
-if [ "${VALUE}" == "null" ] || [ -z "${VALUE}" ]; then VALUE=0.0; fi
-bashio::log.debug "Set longitude to ${VALUE}"
-JSON="${JSON}"',"longitude":'"${VALUE}"
-
-# set elevation for events
-VALUE=$(jq -r '.elevation' "${CONFIG_PATH}")
-if [ "${VALUE}" == "null" ] || [ -z "${VALUE}" ]; then VALUE=0; fi
-bashio::log.debug "Set elevation to ${VALUE}"
-JSON="${JSON}"',"elevation":'"${VALUE}"
-
-## MQTT
-# local MQTT server (hassio addon)
-VALUE=$(jq -r ".mqtt.host" "${CONFIG_PATH}")
-if [ "${VALUE}" == "null" ] || [ -z "${VALUE}" ]; then VALUE="mqtt"; fi
-bashio::log.info "Using MQTT at ${VALUE}"
-MQTT='{"host":"'"${VALUE}"'"'
-# username
-VALUE=$(jq -r ".mqtt.username" "${CONFIG_PATH}")
-if [ "${VALUE}" == "null" ] || [ -z "${VALUE}" ]; then VALUE=""; fi
-bashio::log.info "Using MQTT username: ${VALUE}"
-MQTT="${MQTT}"',"username":"'"${VALUE}"'"'
-# password
-VALUE=$(jq -r ".mqtt.password" "${CONFIG_PATH}")
-if [ "${VALUE}" == "null" ] || [ -z "${VALUE}" ]; then VALUE=""; fi
-bashio::log.info "Using MQTT password: ${VALUE}"
-MQTT="${MQTT}"',"password":"'"${VALUE}"'"'
-# port
-VALUE=$(jq -r ".mqtt.port" "${CONFIG_PATH}")
-if [ "${VALUE}" == "null" ] || [ -z "${VALUE}" ]; then VALUE=1883; fi
-bashio::log.info "Using MQTT port: ${VALUE}"
-MQTT="${MQTT}"',"port":'"${VALUE}"'}'
-# finish
-JSON="${JSON}"',"mqtt":'"${MQTT}"
-
-## W3W
-# local W3W server (hassio addon)
-VALUE=$(jq -r ".w3w.words" "${CONFIG_PATH}")
-if [ "${VALUE}" == "null" ] || [ -z "${VALUE}" ]; then VALUE="w3w"; fi
-bashio::log.info "Using W3W at ${VALUE}"
-W3W='{"words":"'"${VALUE}"'"'
-# apikey
-VALUE=$(jq -r ".w3w.apikey" "${CONFIG_PATH}")
-if [ "${VALUE}" == "null" ] || [ -z "${VALUE}" ]; then VALUE=""; fi
-bashio::log.info "Using W3W apikey: ${VALUE}"
-W3W="${W3W}"',"apikey":"'"${VALUE}"'"}'
-# finish
-JSON="${JSON}"',"w3w":'"${W3W}"
-
-## ADD-ON configuration
-MOTION='{'
-
-# set log_type (FIRST ENTRY)
-VALUE=$(jq -r ".log_addon_type" "${CONFIG_PATH}")
-if [ "${VALUE}" == "null" ] || [ -z "${VALUE}" ]; then VALUE="ALL"; fi
-sed -i "s|^log_type .*|log_type ${VALUE}|" "${MOTION_CONF}"
-MOTION="${MOTION}"'"log_type":"'"${VALUE}"'"'
-bashio::log.debug "Set motion.log_type to ${VALUE}"
-
-# set log_level
-VALUE=$(jq -r ".log_addon_level" "${CONFIG_PATH}")
-case ${VALUE} in
-  emergency)
-    VALUE=1
-    ;;
-  alert)
-    VALUE=2
-    ;;
-  critical)
-    VALUE=3
-    ;;
-  error)
-    VALUE=4
-    ;;
-  warn)
-    VALUE=5
-    ;;
-  info)
-    VALUE=7
-    ;;
-  debug)
-    VALUE=8
-    ;;
-  all)
-    VALUE=9
-    ;;
-  *|notice)
-    VALUE=6
-    ;;
-esac
-sed -i "s/^log_level .*/log_level ${VALUE}/" "${MOTION_CONF}"
-MOTION="${MOTION}"',"log_level":'"${VALUE}"
-bashio::log.debug "Set motion.log_level to ${VALUE}"
-
-# set log_file
-VALUE=$(jq -r ".log_file" "${CONFIG_PATH}")
-if [ "${VALUE}" == "null" ] || [ -z "${VALUE}" ]; then VALUE="/tmp/motion.log"; fi
-sed -i "s|^log_file .*|log_file ${VALUE}|" "${MOTION_CONF}"
-MOTION="${MOTION}"',"log_file":"'"${VALUE}"'"'
-bashio::log.debug "Set log_file to ${VALUE}"
-export MOTION_LOGTO=${VALUE}
-
-# shared directory for results (not images and JSON)
-VALUE=$(jq -r ".share_dir" "${CONFIG_PATH}")
-if [ "${VALUE}" == "null" ] || [ -z "${VALUE}" ]; then VALUE="/share/${MOTION_GROUP}"; fi
-MOTION="${MOTION}"',"share_dir":"'"${VALUE}"'"'
-bashio::log.debug "Set share_dir to ${VALUE}"
-export MOTION_SHARE_DIR="${VALUE}"
-
-# set username and password
-USERNAME=$(jq -r ".username" "${CONFIG_PATH}")
-PASSWORD=$(jq -r ".password" "${CONFIG_PATH}")
-MOTION="${MOTION}"',"username":"'"${USERNAME}"'"'
-MOTION="${MOTION}"',"password":"'"${PASSWORD}"'"'
-
-## end motion structure; cameras section depends on well-formed JSON for $MOTION
-MOTION="${MOTION}"'}'
-bashio::log.debug "MOTION: ${MOTION}"
-
-JSON="${JSON}"',"motion":'"${MOTION}"'}'
-
-
-###
-## validate JSON
-###
-
-echo "${JSON}" | jq -c '.' > "$(motion.config.file)"
-if [ ! -s "$(motion.config.file)" ]; then
-  bashio::log.error "INVALID CONFIGURATION; metadata: ${JSON}"
-  exit 1
-fi
-bashio::log.debug "CONFIGURATION; file: $(motion.config.file); metadata: $(jq -c '.' $(motion.config.file))"
-
-###
-# start Apache
-###
-
-# make the options available to the apache client
-chmod go+rx /data /data/options.json
 start_apache_background ${MOTION_APACHE_CONF} ${MOTION_APACHE_HOST} ${MOTION_APACHE_PORT}
 bashio::log.notice "Started Apache on ${MOTION_APACHE_HOST}:${MOTION_APACHE_PORT}"
 
-## reload Home Assistant iff requested and necessary
-addon::reload
 
 if [ ! -d /share/motion-ai ]; then
   bashio::log.info "Cloning /share/motion-ai"
