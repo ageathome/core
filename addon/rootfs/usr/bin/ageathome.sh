@@ -375,12 +375,6 @@ start_apache_background ${MOTION_APACHE_CONF} ${MOTION_APACHE_HOST} ${MOTION_APA
 bashio::log.notice "Started Apache on ${MOTION_APACHE_HOST}:${MOTION_APACHE_PORT}"
 
 ###
-# reload configuration
-###
-
-addon::setup.reload
-
-###
 # download YAML, etc..
 ###
 
@@ -420,6 +414,16 @@ if [ -d /share/ageathome ] && [ ! -e /config/setup.json ]; then
   make homeassistant/setup.json &> /dev/null && mv homeassistant/setup.json /config
   popd &> /dev/null
 fi
+
+###
+# reload setup
+###
+
+addon::setup.reload
+
+###
+# update configuration
+###
 
 if [ -d /share/ageathome ] && [ -d /share/motion-ai ] && [ -e /config/setup.json ]; then
   bashio::log.info "Updating /config from /share/ageathome/homeassistant"
