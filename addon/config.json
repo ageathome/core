@@ -1,13 +1,6 @@
 {
-  "name": "Age@Home",
-  "description": "Cognitive elder -care and -support",
-  "slug": "ageathome",
-  "stage": "experimental",
-  "startup": "services",
-  "timeout": 300,
-  "tmpfs": true,
-  "url": "https://github.com/ageathome",
-  "version": "0.2.10",
+  "version": "0.4.1",
+  "stage": "stable",
   "arch": [
     "aarch64",
     "amd64",
@@ -15,6 +8,7 @@
   ],
   "audio": false,
   "boot": "auto",
+  "description": "Cognitive elder -care and -support",
   "environment": {
     "LOG_FORMAT": "{LEVEL}: {MESSAGE}"
   },
@@ -30,24 +24,25 @@
     "share:rw",
     "config:rw"
   ],
+  "name": "Age@Home",
   "options": {
     "log_level": "info",
-    "timezone": "America/Los_Angeles",
-    "w3w": {
-      "apikey": "APIKEY4U",
-      "words": "///what.three.words"
-    },
     "mqtt": {
       "host": "core-mosquitto",
+      "password": "password",
       "port": 1883,
-      "username": "username",
-      "password": "password"
+      "username": "username"
     },
     "overview": {
       "apikey": "",
       "image": "overview.jpg",
       "mode": "local",
       "zoom": 18
+    },
+    "timezone": "America/Los_Angeles",
+    "w3w": {
+      "apikey": "APIKEY4U",
+      "words": "///what.three.words"
     }
   },
   "panel_admin": true,
@@ -71,12 +66,11 @@
   "schema": {
     "client": "str?",
     "device": "str?",
+    "elevation": "int?",
     "group": "str?",
     "latitude": "float?",
-    "longitude": "float?",
-    "elevation": "int?",
-    "timezone": "str?",
     "log_level": "str",
+    "longitude": "float?",
     "mqtt": {
       "host": "str?",
       "password": "str?",
@@ -91,12 +85,18 @@
     },
     "person": "str?",
     "reload": "bool?",
+    "timezone": "str?",
     "unit_system": "list(imperial|metric)?",
     "w3w": {
       "apikey": "str?",
       "words": "str?"
     }
   },
+  "slug": "ageathome",
+  "startup": "services",
+  "timeout": 300,
+  "tmpfs": true,
+  "url": "https://github.com/ageathome",
   "video": false,
   "webui": "http://[HOST]:[PORT:7999]/"
 }
