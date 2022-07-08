@@ -15,6 +15,8 @@ function addon::setup.update()
 
   if [ "${new:-null}" != 'null' ] &&  [ "${old:-}" != "${new:-}" ]; then
     jq -c '.timestamp="'$(date -u '+%FT%TZ')'"|.'"${e}"'="'"${new}"'"' /config/setup.json > /tmp/setup.json.$$ && mv -f /tmp/setup.json.$$ /config/setup.json && bashio::log.info "Updated ${e}: ${new}; old: ${old}" && update=1 || bashio::log.warning "Could not update ${e} to ${new}"
+    bashio::log.info "Updated ${e}: ${new}; old: ${old}"
+    update=1
   else
     bashio::log.debug "${FUNCNAME[0]} no change ${e}: ${old}; new: ${new}"
   fi
@@ -381,8 +383,8 @@ if [ ! -d /share/motion-ai ]; then
   git clone http://github.com/motion-ai/motion-ai /share/motion-ai &> /dev/null
 else
   pushd /share/motion-ai &> /dev/null
-  bashio::log.info "Pulling /share/motion-ai"
-  git pull &> /dev/null
+  bashio::log.info "Updating /share/motion-ai"
+  git checkout &> /dev/null
   popd &> /dev/null
 fi
 
@@ -399,11 +401,12 @@ if [ -d /share/ageathome ]; then
   elif [ ! -d /share/motion-ai ]; then
     bashio::log.error "Could not link to /share/motion-ai"
   fi
-  bashio::log.info "Pulling /share/ageathome"
-  git pull &> /dev/null
+  bashio::log.info "Updating /share/ageathome"
+  git checkout &> /dev/null
   popd &> /dev/null
 else
-  bashio::log.error "Cannot find /share/ageathome"
+  bashio::log.fatal "Cannot find /share/ageathome"
+  exit 1
 fi
 
 if [ -d /share/ageathome ] && [ ! -e /config/setup.json ]; then
@@ -411,6 +414,9 @@ if [ -d /share/ageathome ] && [ ! -e /config/setup.json ]; then
   pushd /share/ageathome &> /dev/null
   make homeassistant/setup.json &> /dev/null && mv homeassistant/setup.json /config
   popd &> /dev/null
+else
+  bashio::log.fatal "Cannot find /config/setup.json"
+  exit 1
 fi
 
 ###
@@ -433,7 +439,8 @@ if [ -d /share/ageathome ] && [ -d /share/motion-ai ] && [ -e /config/setup.json
   MOTION_APP="Age@Home" HOST_IPADDR="$(echo "${CONFIG:-null}" | jq -r '.network.ip')" PACKAGES="" make &> /dev/null
   popd &> /dev/null
 else
-  bashio::log.error "Cannot find /config/setup.json"
+  bashio::log.fatal "Cannot find /config/setup.json"
+  exit 1
 fi
 
 ## fork process to on-board devices and set CoIoT for motion sensors
