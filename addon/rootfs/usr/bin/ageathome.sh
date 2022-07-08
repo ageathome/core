@@ -15,8 +15,6 @@ function addon::setup.update()
 
   if [ "${new:-null}" != 'null' ] &&  [ "${old:-}" != "${new:-}" ]; then
     jq -c '.timestamp="'$(date -u '+%FT%TZ')'"|.'"${e}"'="'"${new}"'"' /config/setup.json > /tmp/setup.json.$$ && mv -f /tmp/setup.json.$$ /config/setup.json && bashio::log.info "Updated ${e}: ${new}; old: ${old}" && update=1 || bashio::log.warning "Could not update ${e} to ${new}"
-    bashio::log.info "Updated ${e}: ${new}; old: ${old}"
-    update=1
   else
     bashio::log.debug "${FUNCNAME[0]} no change ${e}: ${old}; new: ${new}"
   fi
@@ -342,10 +340,11 @@ source ${USRBIN:-/usr/bin}/motion-tools.sh
 
 CONFIG=$(addon::config)
 if [ ! -s "$(motion.config.file)" ]; then
-  bashio::log.error "Cannot find file: $(motion.config.file)"
+  bashio::log.fatal "Cannot find file: $(motion.config.file)"
   exit 1
 elif [ "${CONFIG:-null}" == 'null' ]; then
-  bashio::log.warning "No configuration"
+  bashio::log.fatal "No configuration"
+  exit 1
 else
   bashio::log.info "${CONFIG:-}"
 fi
@@ -381,16 +380,24 @@ bashio::log.notice "Started Apache on ${MOTION_APACHE_HOST}:${MOTION_APACHE_PORT
 if [ ! -d /share/motion-ai ]; then
   bashio::log.info "Cloning /share/motion-ai"
   git clone http://github.com/motion-ai/motion-ai /share/motion-ai &> /dev/null
-else
+  INIT=1
+fi
+
+if [ -d /share/motion-ai ]; then
   pushd /share/motion-ai &> /dev/null
   bashio::log.info "Updating /share/motion-ai"
   git checkout &> /dev/null
+  git pull &> /dev/null
   popd &> /dev/null
+else
+  bashio::log.fatal "Cannot find /share/motion-ai"
+  exit 1
 fi
 
 if [ ! -d /share/ageathome ]; then
   bashio::log.info "Cloning /share/ageathome"
   git clone http://github.com/ageathome/core /share/ageathome &> /dev/null
+  INIT=1
 fi
 
 if [ -d /share/ageathome ]; then
@@ -403,20 +410,18 @@ if [ -d /share/ageathome ]; then
   fi
   bashio::log.info "Updating /share/ageathome"
   git checkout &> /dev/null
+  git pull &> /dev/null
   popd &> /dev/null
 else
   bashio::log.fatal "Cannot find /share/ageathome"
   exit 1
 fi
 
-if [ -d /share/ageathome ] && [ ! -e /config/setup.json ]; then
+if [ ! -e /config/setup.json ]; then
   bashio::log.info "Initializing /share/ageathome"
   pushd /share/ageathome &> /dev/null
   make homeassistant/setup.json &> /dev/null && mv homeassistant/setup.json /config
   popd &> /dev/null
-else
-  bashio::log.fatal "Cannot find /config/setup.json"
-  exit 1
 fi
 
 ###
@@ -438,8 +443,11 @@ if [ -d /share/ageathome ] && [ -d /share/motion-ai ] && [ -e /config/setup.json
   pushd /config &> /dev/null
   MOTION_APP="Age@Home" HOST_IPADDR="$(echo "${CONFIG:-null}" | jq -r '.network.ip')" PACKAGES="" make &> /dev/null
   popd &> /dev/null
-else
+elif [ ! -e /config/setup.json ]; then
   bashio::log.fatal "Cannot find /config/setup.json"
+  exit 1
+elif [ ! -d /share/ageathome ]; then
+  bashio::log.fatal "Cannot find /share/ageathome"
   exit 1
 fi
 
