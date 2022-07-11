@@ -386,7 +386,7 @@ fi
 if [ -d /share/motion-ai ]; then
   pushd /share/motion-ai &> /dev/null
   bashio::log.info "Updating /share/motion-ai"
-  git checkout &> /dev/null
+  git checkout . &> /dev/null
   git pull &> /dev/null
   popd &> /dev/null
 else
@@ -409,7 +409,7 @@ if [ -d /share/ageathome ]; then
     bashio::log.error "Could not link to /share/motion-ai"
   fi
   bashio::log.info "Updating /share/ageathome"
-  git checkout &> /dev/null
+  git checkout . &> /dev/null
   git pull &> /dev/null
   popd &> /dev/null
 else
