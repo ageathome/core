@@ -420,7 +420,8 @@ fi
 if [ ! -e /config/setup.json ]; then
   bashio::log.info "Initializing /share/ageathome"
   pushd /share/ageathome &> /dev/null
-  make homeassistant/setup.json &> /dev/null && mv homeassistant/setup.json /config
+  MOTION_APP="Age@Home" HOST_NAME="ageathome" HOST_IPADDR="$(echo "${CONFIG:-null}" | jq -r '.network.ip')" \
+    make homeassistant/setup.json &> /dev/null && mv homeassistant/setup.json /config
   popd &> /dev/null
 fi
 
