@@ -223,16 +223,36 @@ function addon::config.mqtt()
 {
   bashio::log.trace "${FUNCNAME[0]} ${*}"
 
-  local VALUE=$(bashio::config "mqtt.host") 
   local network="${1:-}"
   local ip=$(echo "${network:-null}" | jq -r '.ip?')
+  local host
+  local port=1883
+  local username
+  local password
 
-  if [ "${VALUE:-null}" == 'null' ]; then VALUE="${ip}"; fi
 
-  local host=$(addon::config.option mqtt.host "${VALUE}")
-  local port=$(addon::config.option mqtt.port 1883)
-  local username=$(addon::config.option mqtt.username username)
-  local password=$(addon::config.option mqtt.password password)
+  if [ $(bashio::services.available "mqtt") ]; then
+    host=$(bashio::service 'mqtt' 'host')
+    port=$(bashio::service 'mqtt' 'port')
+    username=$(bashio::service 'mqtt' 'username')
+    password=$(bashio::service 'mqtt' 'password')
+  else
+    bashio::log.info "${FUNCNAME[0]}: MQTT service unavailable through supervisor; using configuration."
+  fi
+
+  if [ -z "${host:-}" ]; then 
+    host=$(bashio::config "mqtt.host") 
+    if [ "${host:-null}" = 'null' ]; then 
+      host="${ip:-127.0.0.1}"
+      bashio::log.warn "${FUNCNAME[0]}: MQTT host configuration undefined; using host IP address: ${host:-}"
+    fi
+
+    # set from configuration with defaults
+    host=$(addon::config.option mqtt.host "${host}")
+    port=$(addon::config.option mqtt.port "${port}")
+    username=$(addon::config.option mqtt.username 'username')
+    password=$(addon::config.option mqtt.password 'password')
+  fi
 
   echo '{"host":"'${host:-}'","port":'${port:-null}',"username":"'${username:-}'","password":"'${password:-}'"}'
 }

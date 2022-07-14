@@ -1,5 +1,5 @@
 {
-  "version": "0.5.6",
+  "version": "0.6.0",
   "stage": "stable",
   "arch": [
     "aarch64",
@@ -92,6 +92,9 @@
       "words": "str?"
     }
   },
+  "services": [
+    "mqtt:need"
+  ],
   "slug": "ageathome",
   "startup": "services",
   "timeout": 300,
