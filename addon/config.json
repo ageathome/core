@@ -64,10 +64,10 @@
     "runc": true
   },
   "schema": {
-    "client": "str?",
-    "device": "str?",
-    "elevation": "int?",
     "group": "str?",
+    "device": "str?",
+    "client": "str?",
+    "elevation": "int?",
     "latitude": "float?",
     "log_level": "str",
     "longitude": "float?",
