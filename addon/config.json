@@ -1,6 +1,5 @@
 {
   "version": "0.6.0",
-  "stage": "stable",
   "arch": [
     "aarch64",
     "amd64",
@@ -64,10 +63,10 @@
     "runc": true
   },
   "schema": {
-    "group": "str?",
-    "device": "str?",
     "client": "str?",
+    "device": "str?",
     "elevation": "int?",
+    "group": "str?",
     "latitude": "float?",
     "log_level": "str",
     "longitude": "float?",
@@ -93,9 +92,10 @@
     }
   },
   "services": [
-    "mqtt:need"
+    "mqtt:want"
   ],
   "slug": "ageathome",
+  "stage": "stable",
   "startup": "services",
   "timeout": 300,
   "tmpfs": true,
