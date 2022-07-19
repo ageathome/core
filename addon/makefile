@@ -59,6 +59,9 @@ default: build run check
 
 all: service-push service-publish service-verify pattern-publish pattern-validate
 
+sbom.json: 
+	docker sbom --format syft-json --quiet --output $@ $(DOCKER_REPOSITORY)/$(DOCKER_NAME):$(SERVICE_VERSION)
+
 ##
 ## support
 ##

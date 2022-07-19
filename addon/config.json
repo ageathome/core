@@ -1,5 +1,5 @@
 {
-  "version": "0.6.1",
+  "version": "0.6.2",
   "arch": [
     "aarch64",
     "amd64",
@@ -96,7 +96,7 @@
   ],
   "slug": "ageathome",
   "stage": "stable",
-  "startup": "services",
+  "startup": "initialize",
   "timeout": 300,
   "tmpfs": true,
   "url": "https://github.com/ageathome",
