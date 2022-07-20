@@ -59,8 +59,15 @@ default: build run check
 
 all: service-push service-publish service-verify pattern-publish pattern-validate
 
-sbom.json: 
+SBOM_JSON = sbom.$(DOCKER_NAME).$(SERVICE_VERSION).json
+
+$(SBOM_JSON):
+	@echo "${MC}Making: $@${NC}"
 	docker sbom --format syft-json --quiet --output $@ $(DOCKER_REPOSITORY)/$(DOCKER_NAME):$(SERVICE_VERSION)
+
+sbom.json: $(SBOM_JSON)
+	@echo "${MC}Making: $@ from $@${NC}"
+	jq -S '.' $< > $@
 
 ##
 ## support
@@ -331,7 +338,7 @@ tidy:
 
 clean: remove stop-service
 	@echo "${MC}>>> MAKE --" $$(date +%T) "-- clean: ${SERVICE_NAME}; tag: ${DOCKER_TAG}""${NC}" > /dev/stderr
-	@rm -fr ${DIR} check.json build.*.out test.*.out test.*.json test.*.jpeg make.out
+	@rm -fr ${DIR} sbom.*.json check.json build.*.out test.*.out test.*.json test.*.jpeg make.out
 	-@docker rmi $(DOCKER_TAG) 2> /dev/null || :
 
 distclean: service-clean

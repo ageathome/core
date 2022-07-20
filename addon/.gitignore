@@ -1,4 +1,5 @@
 build.*.out
+sbom.*.json
 data/
 cameras.json
 MOTIONCAM_PASSWORD
