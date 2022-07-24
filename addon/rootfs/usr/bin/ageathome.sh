@@ -42,7 +42,9 @@ function addon::setup.reload()
 
         # check configuration (timezone, latitude, longitude, mqtt, group, device, client)
         if [ -e /config/setup.json ]; then
-          # ww3
+          # w3w
+          tf=$(addon::setup.update 'site' 'MOTION_SITE') && update=$((update+tf))
+          # w3w
           tf=$(addon::setup.update 'w3w.apikey' 'MOTION_W3W_APIKEY') && update=$((update+tf))
           tf=$(addon::setup.update 'w3w.words' 'MOTION_W3W_WORDS') && update=$((update+tf))
           # uptimerobot 
