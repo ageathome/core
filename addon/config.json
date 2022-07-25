@@ -1,5 +1,5 @@
 {
-  "version": "0.6.2",
+  "version": "0.6.7",
   "arch": [
     "aarch64",
     "amd64",
@@ -25,7 +25,7 @@
   ],
   "name": "Age@Home",
   "options": {
-    "log_level": "info",
+    "site": "My House",
     "mqtt": {
       "host": "core-mosquitto",
       "password": "password",
@@ -38,11 +38,13 @@
       "mode": "local",
       "zoom": 18
     },
+    "uptimerobot_rssurl": "",
     "timezone": "America/Los_Angeles",
     "w3w": {
       "apikey": "APIKEY4U",
       "words": "///what.three.words"
-    }
+    },
+    "log_level": "info"
   },
   "panel_admin": true,
   "panel_icon": "mdi:home-heart",
@@ -63,6 +65,7 @@
     "runc": true
   },
   "schema": {
+    "site": "str?",
     "client": "str?",
     "device": "str?",
     "elevation": "int?",
@@ -85,6 +88,7 @@
     "person": "str?",
     "reload": "bool?",
     "timezone": "str?",
+    "uptimerobot_rssurl": "str?",
     "unit_system": "list(imperial|metric)?",
     "w3w": {
       "apikey": "str?",
