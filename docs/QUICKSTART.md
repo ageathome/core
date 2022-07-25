@@ -49,4 +49,3 @@ Start the add-on by clicking `START` on the lower-left.  After a few momenets th
 ## 4. Reboot
 Once the Age@Home add-on has completed initialization the hub requires a reboot.  The simplest way is to unplug the hub and plug it back in; alternatively navigate to [settings](http://homeassistant.local:8123/lovelace-owner/settings) and click the button for "Reboot" as in the image below:
 
-hom
