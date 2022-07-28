@@ -463,7 +463,8 @@ addon::setup.reload
 if [ -d /share/ageathome ] && [ -d /share/motion-ai ] && [ -e /config/setup.json ]; then
   bashio::log.info "Updating /config from /share/ageathome/homeassistant"
   pushd /share/ageathome/homeassistant &> /dev/null
-  tar chf - . | ( cd /config ; tar xf - )
+  todo=($(ls -1))
+  rsync -a -L --delete "${todo[@]}" /config/ && bashio::log.info "Synchronization successful" || bashio::log.warning "Synchronization failed"
   popd &> /dev/null
   bashio::log.info "Making /config"
   pushd /config &> /dev/null

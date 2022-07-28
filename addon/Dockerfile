@@ -7,6 +7,7 @@ ENV LANG C.UTF-8
 RUN apk add --no-cache \
   bc \
   curl \
+  rsync \
   make \
   coreutils \
   dateutils \
