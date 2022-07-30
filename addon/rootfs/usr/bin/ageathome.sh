@@ -71,8 +71,11 @@ function addon::setup.reload()
           tf=$(addon::setup.update 'overview.image' 'MOTION_OVERVIEW_IMAGE') && update=$((update+tf))
           tf=$(addon::setup.update 'overview.mode' 'MOTION_OVERVIEW_MODE') && update=$((update+tf))
           tf=$(addon::setup.update 'overview.zoom' 'MOTION_OVERVIEW_ZOOM') && update=$((update+tf))
-          # USER
-          tf=$(addon::setup.update 'person.user' 'MOTION_USER') && update=$((update+tf))
+          # USERS
+          tf=$(addon::setup.update 'roles.person' 'MOTION_USER') && update=$((update+tf))
+          tf=$(addon::setup.update 'roles.primary' 'MOTION_PRIMARY') && update=$((update+tf))
+          tf=$(addon::setup.update 'roles.secondary' 'MOTION_SECONDARY') && update=$((update+tf))
+          tf=$(addon::setup.update 'roles.tertiary' 'MOTION_TERTIARY') && update=$((update+tf))
         fi
 
         # test if update

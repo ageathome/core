@@ -1,5 +1,5 @@
 {
-  "version": "0.7.0",
+  "version": "0.7.2",
   "arch": [
     "aarch64",
     "amd64",
@@ -26,6 +26,12 @@
   "name": "Age@Home",
   "options": {
     "site": "My House",
+    "roles": {
+      "person": "owner-username",
+      "primary": "",
+      "secondary": "",
+      "tertiary": ""
+    },
     "mqtt": {
       "host": "core-mosquitto",
       "password": "password",
@@ -85,7 +91,12 @@
       "mode": "list(local|hybrid|roadmap|satellite|terrain)?",
       "zoom": "int(10,22)?"
     },
-    "person": "str?",
+    "roles": {
+      "person": "str?",
+      "primary": "str?",
+      "secondary": "str?",
+      "tertiary": "str?"
+    },
     "reload": "bool?",
     "timezone": "str?",
     "uptimerobot_rssurl": "str?",
