@@ -10,8 +10,8 @@ function addon::setup.update()
   local e="${2:-}"
   local update
 
-  old=$(jq -r '.'"${e}"'?' /config/setup.json)
   new=$(jq -r '.'"${c}"'?' $(motion.config.file))
+  old=$(jq -r '.'"${e}"'?' /config/setup.json)
 
   if [ "${new:-null}" != 'null' ] &&  [ "${old:-}" != "${new:-}" ]; then
     jq -c '.timestamp="'$(date -u '+%FT%TZ')'"|.'"${e}"'="'"${new}"'"' /config/setup.json > /tmp/setup.json.$$ && mv -f /tmp/setup.json.$$ /config/setup.json && bashio::log.info "Updated ${e}: ${new}; old: ${old}" && update=1 || bashio::log.warning "Could not update ${e} to ${new}"
@@ -188,6 +188,34 @@ function addon::config.option()
   echo "${VALUE:-}"
 }
 
+## overview
+
+function addon::config.overview()
+{
+  bashio::log.trace "${FUNCNAME[0]} ${*}"
+
+  local apikey=$(addon::config.option overview.apikey "")
+  local image=$(addon::config.option overview.image "overview.jpg")
+  local mode=$(addon::config.option overview.mode "local")
+  local zoom=$(addon::config.option overview.zoom 18)
+
+  echo '{"apikey":"'${apikey:-}'","image":"'${image:-}'","mode":"'${mode:-}'","zoom":'${zoom:-18}'}'
+}
+
+## roles
+
+function addon::config.roles()
+{
+  bashio::log.trace "${FUNCNAME[0]} ${*}"
+
+  local person=$(addon::config.option roles.person "")
+  local primary=$(addon::config.option roles.primary "")
+  local secondary=$(addon::config.option roles.secondary "")
+  local tertiary=$(addon::config.option roles.tertiary "")
+
+  echo '{"person":"'${person:-}'","primary":"'${primary:-}'","secondary":"'${secondary:-}'","tertiary":"'${tertiary:-}'"}'
+}
+
 ## location
 
 function addon::config.location()
@@ -344,11 +372,13 @@ function addon::config()
 
   network=$(addon::config.network)
   timezone=$(addon::config.timezone)
+  roles=$(addon::config.roles)
+  overview=$(addon::config.overview)
   location=$(addon::config.location)
   mqtt=$(addon::config.mqtt "${network:-}")
   options=$(addon::config.options)
 
-  echo '{"network":'${network:-null}',"timezone":"'${timezone:-}'","location":'${location:-null}',"mqtt":'${mqtt:-null}',"options":'${options:-null}'}'
+  echo '{"network":'${network:-null}',"timezone":"'${timezone:-}'","location":'${location:-null}',"overview":'${overview:-null}',"roles":'${roles:-null}',"mqtt":'${mqtt:-null}',"options":'${options:-null}'}'
 }
 
 ###
