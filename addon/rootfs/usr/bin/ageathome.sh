@@ -339,11 +339,12 @@ function addon::config.options()
   local device=$(addon::config.option device "$(hostname -s)")
   local rssurl=$(addon::config.option uptimerobot_rssurl "unknown")
   local unit_system=$(addon::config.option unit_system "imperial")
+  local site=$(addon::config.option site "My House")
   local group=$(addon::config.option group "motion")
   local client=$(addon::config.option client "+")
   local share_dir=$(addon::config.option share_dir "/share/${group:-motion}")
 
-  echo '{"device":"'${device:-}'","rssurl":"'${rssurl:-}'","unit_system":"'${unit_system:-}'","share_dir":"'${share_dir:-}'","group":"'${group:-}'","client":"'${client:-}'"}'
+  echo '{"device":"'${device:-}'","rssurl":"'${rssurl:-}'","unit_system":"'${unit_system:-}'","share_dir":"'${share_dir:-}'","site":"'${site:-}'","group":"'${group:-}'","client":"'${client:-}'"}'
 }
 
 # init
@@ -503,7 +504,11 @@ if [ -d /share/ageathome ] && [ -d /share/motion-ai ] && [ -e /config/setup.json
   popd &> /dev/null
   bashio::log.info "Making /config"
   pushd /config &> /dev/null
-  MOTION_APP="Age@Home" HOST_NAME="ageathome" HOST_IPADDR="$(echo "${CONFIG:-null}" | jq -r '.network.ip')" PACKAGES="" make &> /dev/null
+  MOTION_APP="Age@Home" \
+    HOST_NAME="ageathome" \
+    HOST_IPADDR="$(echo "${CONFIG:-null}" | jq -r '.network.ip')" \
+    PACKAGES="" \
+    make &> /dev/null
   popd &> /dev/null
 elif [ ! -e /config/setup.json ]; then
   bashio::log.fatal "Cannot find /config/setup.json"
