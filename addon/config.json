@@ -1,5 +1,5 @@
 {
-  "version": "0.7.16",
+  "version": "0.7.17",
   "arch": [
     "aarch64",
     "amd64",
@@ -46,6 +46,10 @@
     },
     "uptimerobot_rssurl": "",
     "timezone": "America/Los_Angeles",
+    "wifi": {
+      "ssid": "",
+      "password": ""
+    },
     "w3w": {
       "apikey": "APIKEY4U",
       "words": "///what.three.words"
@@ -101,6 +105,10 @@
     "timezone": "str?",
     "uptimerobot_rssurl": "str?",
     "unit_system": "list(imperial|metric)?",
+    "wifi": {
+      "ssid": "str?",
+      "password": "password?"
+    },
     "w3w": {
       "apikey": "str?",
       "words": "str?"
