@@ -1,9 +1,10 @@
 {
-  "version": "0.7.20",
+  "version": "0.7.21",
   "arch": [
     "aarch64",
     "amd64",
-    "armv7"
+    "armv7",
+    "i386"
   ],
   "audio": false,
   "boot": "auto",
