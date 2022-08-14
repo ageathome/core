@@ -374,8 +374,8 @@ function addon::config()
   local roles=$(addon::config.roles)
   local overview=$(addon::config.overview)
   local location=$(addon::config.location)
-  local mqtt=$(addon::config.mqtt "${network:-}")
   local network=$(addon::config.network)
+  local mqtt=$(addon::config.mqtt "${network:-}")
 
   echo '{"timezone":"'${timezone:-}'","location":'${location:-null}',"network":'${network:-null}',"overview":'${overview:-null}',"roles":'${roles:-null}',"mqtt":'${mqtt:-null}',"options":'${options:-null}'}'
 }
@@ -523,7 +523,7 @@ fi
 ## reboot host if INIT=1
 if [ ${INIT:-0} != 0 ]; then
   local reboot=$(jq '.supervisor.info.data.features|index("reboot")>=0' "$(motion.config.file)")
-  if [ "${reboot:-false)" = 'true' ]; then
+  if [ "${reboot:-false}" = 'true' ]; then
     bashio::log.debug "Requesting host reboot for intitialization"
     reboot=$(curl -sSL -X POST -H "Authorization: Bearer ${SUPERVISOR_TOKEN}" -H "Content-Type: application/json" http://supervisor/host/reboot)
     bashio::log.debug "Host reboot response: ${reboot:-null}"
