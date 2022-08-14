@@ -378,11 +378,11 @@ function addon::config()
   location=$(addon::config.location)
   mqtt=$(addon::config.mqtt "${network:-}")
   options=$(addon::config.options)
-  info=$(curl -X GET -H "Authorization: Bearer ${SUPERVISOR_TOKEN}" -H "Content-Type: application/json" http://supervisor/info)
-  config=$(curl -X GET -H "Authorization: Bearer ${SUPERVISOR_TOKEN}" -H "Content-Type: application/json" http://supervisor/core/api/config)
-  services=$(curl -X GET -H "Authorization: Bearer ${SUPERVISOR_TOKEN}" -H "Content-Type: application/json" http://supervisor/services)
+  info=$(curl -sSL -X GET -H "Authorization: Bearer ${SUPERVISOR_TOKEN}" -H "Content-Type: application/json" http://supervisor/info)
+  config=$(curl -sSL -X GET -H "Authorization: Bearer ${SUPERVISOR_TOKEN}" -H "Content-Type: application/json" http://supervisor/core/api/config)
+  services=$(curl -sSL -X GET -H "Authorization: Bearer ${SUPERVISOR_TOKEN}" -H "Content-Type: application/json" http://supervisor/services)
 
-  echo '{"supervisor":{"service":'${services:-null}',"config":'${config:-null}',"info":'${info:-null}'},"network":'${network:-null}',"timezone":"'${timezone:-}'","location":'${location:-null}',"overview":'${overview:-null}',"roles":'${roles:-null}',"mqtt":'${mqtt:-null}',"options":'${options:-null}'}'
+  echo '{"supervisor":{"services":'${services:-null}',"config":'${config:-null}',"info":'${info:-null}'},"network":'${network:-null}',"timezone":"'${timezone:-}'","location":'${location:-null}',"overview":'${overview:-null}',"roles":'${roles:-null}',"mqtt":'${mqtt:-null}',"options":'${options:-null}'}'
 }
 
 ###
@@ -528,7 +528,7 @@ fi
 ## reboot host if INIT=1
 if [ ${INIT:-0} != 0 ]; then
   bashio::log.notice "Requesting host reboot for intitialization"
-  reboot=$(curl -X POST -H "Authorization: Bearer ${SUPERVISOR_TOKEN}" -H "Content-Type: application/json" http://supervisor/host/reboot)
+  reboot=$(curl -sSL -X POST -H "Authorization: Bearer ${SUPERVISOR_TOKEN}" -H "Content-Type: application/json" http://supervisor/host/reboot)
   bashio::log.notice "Host reboot response: ${reboot:-null}"
 fi
 
