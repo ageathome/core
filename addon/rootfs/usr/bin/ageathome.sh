@@ -378,9 +378,10 @@ function addon::config()
   location=$(addon::config.location)
   mqtt=$(addon::config.mqtt "${network:-}")
   options=$(addon::config.options)
-  supervisor=$(curl -X GET -H "Authorization: Bearer ${SUPERVISOR_TOKEN}" -H "Content-Type: application/json" http://supervisor/core/api/config)
+  info=$(curl -X GET -H "Authorization: Bearer ${SUPERVISOR_TOKEN}" -H "Content-Type: application/json" http://supervisor/info)
+  config=$(curl -X GET -H "Authorization: Bearer ${SUPERVISOR_TOKEN}" -H "Content-Type: application/json" http://supervisor/core/api/config)
 
-  echo '{"supervisor":'${supervisor:-null}'"network":'${network:-null}',"timezone":"'${timezone:-}'","location":'${location:-null}',"overview":'${overview:-null}',"roles":'${roles:-null}',"mqtt":'${mqtt:-null}',"options":'${options:-null}'}'
+  echo '{"supervisor":{"config":'${config:-null}',"info":'${info:-null}'},"network":'${network:-null}',"timezone":"'${timezone:-}'","location":'${location:-null}',"overview":'${overview:-null}',"roles":'${roles:-null}',"mqtt":'${mqtt:-null}',"options":'${options:-null}'}'
 }
 
 ###
@@ -485,6 +486,7 @@ if [ ! -e /config/setup.json ]; then
   MOTION_APP="Age@Home" HOST_NAME="ageathome" HOST_IPADDR="$(echo "${CONFIG:-null}" | jq -r '.network.ip')" \
     make homeassistant/setup.json &> /dev/null && mv homeassistant/setup.json /config
   popd &> /dev/null
+  INIT=1
 fi
 
 ###
@@ -521,6 +523,13 @@ fi
 
 ## fork process to on-board devices and set CoIoT for motion sensors
 # implement this code
+
+## reboot host if INIT=1
+if [ ${INIT:-0} != 0 ]; then
+  bashio::log.notice "Requesting host reboot for intitialization"
+  reboot=$(curl -X POST -H "Authorization: Bearer ${SUPERVISOR_TOKEN}" -H "Content-Type: application/json" http://supervisor/host/reboot)
+  bashio::log.notice "Host reboot response: ${reboot:-null}"
+fi
 
 ## forever
 while true; do
