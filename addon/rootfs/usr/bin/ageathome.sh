@@ -14,9 +14,9 @@ function addon::setup.update()
   old=$(jq -r '.'"${e}"'?' /config/setup.json)
 
   if [ "${new:-null}" != 'null' ] &&  [ "${old:-}" != "${new:-}" ]; then
-    jq -c '.timestamp="'$(date -u '+%FT%TZ')'"|.'"${e}"'="'"${new}"'"' /config/setup.json > /tmp/setup.json.$$ && mv -f /tmp/setup.json.$$ /config/setup.json && bashio::log.info "Updated ${e}: ${new}; old: ${old}" && update=1 || bashio::log.warning "Could not update ${e} to ${new}"
+    jq -c '.timestamp="'$(date -u '+%FT%TZ')'"|.'"${e}"'="'"${new}"'"' /config/setup.json > /tmp/setup.json.$$ && mv -f /tmp/setup.json.$$ /config/setup.json && bashio::log.debug "Updated ${e}: ${new}; old: ${old}" && update=1 || bashio::log.warning "Could not update ${e} to ${new}"
   elif [ "${new:-null}" == 'null' ] &&  [ "${old:-}" == "null" ]; then
-    jq -c '.timestamp="'$(date -u '+%FT%TZ')'"|.'"${e}"'="'"${new}"'"' /config/setup.json > /tmp/setup.json.$$ && mv -f /tmp/setup.json.$$ /config/setup.json && bashio::log.info "Initialized ${e}: ${new}" && update=1 || bashio::log.warning "Could not initialize ${e} to ${new}"
+    jq -c '.timestamp="'$(date -u '+%FT%TZ')'"|.'"${e}"'="'"${new}"'"' /config/setup.json > /tmp/setup.json.$$ && mv -f /tmp/setup.json.$$ /config/setup.json && bashio::log.debug "Initialized ${e}: ${new}" && update=1 || bashio::log.warning "Could not initialize ${e} to ${new}"
   else
     bashio::log.debug "${FUNCNAME[0]} no change ${e}: ${old}; new: ${new}"
   fi
@@ -36,7 +36,7 @@ function addon::setup.reload()
     local tf
 
     while true; do
-      bashio::log.notice "Option 'reload' is true; querying for ${i} seconds at ${MOTION_APACHE_HOST}:${MOTION_APACHE_PORT}"
+      bashio::log.debug "Option 'reload' is true; querying for ${i} seconds at ${MOTION_APACHE_HOST}:${MOTION_APACHE_PORT}"
       local config=$(curl -sSL -m ${i} ${MOTION_APACHE_HOST}:${MOTION_APACHE_PORT}/cgi-bin/config 2> /dev/null || true)
 
       config=$(echo "${config}" | jq '.config?')
@@ -82,9 +82,9 @@ function addon::setup.reload()
 
         # test if update
         if [ ${update:-0} -gt 0 ]; then
-          bashio::log.notice "Updated settings"
+          bashio::log.debug "Updated settings"
         else
-          bashio::log.notice "No updates"
+          bashio::log.debug "No updates"
         fi
         break
       fi
@@ -99,9 +99,9 @@ function addon::setup.reload()
       fi
     done
   elif [ ! -e /config/setup.json ]; then
-    bashio::log.notice "Did not find /config/setup.json"
+    bashio::log.debug "Did not find /config/setup.json"
   else 
-    bashio::log.info "Reload off"
+    bashio::log.debug "Reload off"
   fi
 }
 
@@ -274,7 +274,7 @@ function addon::config.mqtt()
     username=$(bashio::service 'mqtt' 'username')
     password=$(bashio::service 'mqtt' 'password')
   else
-    bashio::log.info "${FUNCNAME[0]}: MQTT service unavailable through supervisor; using configuration."
+    bashio::log.debug "${FUNCNAME[0]}: MQTT service unavailable through supervisor; using configuration."
   fi
 
   if [ -z "${host:-}" ]; then 
@@ -405,7 +405,7 @@ elif [ "${CONFIG:-null}" == 'null' ]; then
   bashio::log.fatal "No configuration"
   exit 1
 else
-  bashio::log.info "${CONFIG:-}"
+  bashio::log.debug "${CONFIG:-}"
 fi
 
 ###
@@ -430,7 +430,7 @@ if [ -z "${MOTION_APACHE_HTDOCS:-}" ]; then
 fi
 
 start_apache_background ${MOTION_APACHE_CONF} ${MOTION_APACHE_HOST} ${MOTION_APACHE_PORT}
-bashio::log.notice "Started Apache on ${MOTION_APACHE_HOST}:${MOTION_APACHE_PORT}"
+bashio::log.debug "Started Apache on ${MOTION_APACHE_HOST}:${MOTION_APACHE_PORT}"
 
 ###
 # download YAML, etc..
@@ -524,9 +524,9 @@ fi
 if [ ${INIT:-0} != 0 ]; then
   local reboot=$(jq '.supervisor.info.data.features|index("reboot")>=0' $(motion.config.file))
   if [ "${reboot:-false)" = 'true' ]; then
-    bashio::log.info "Requesting host reboot for intitialization"
+    bashio::log.debug "Requesting host reboot for intitialization"
     reboot=$(curl -sSL -X POST -H "Authorization: Bearer ${SUPERVISOR_TOKEN}" -H "Content-Type: application/json" http://supervisor/host/reboot)
-    bashio::log.info "Host reboot response: ${reboot:-null}"
+    bashio::log.debug "Host reboot response: ${reboot:-null}"
   else
     bashio::log.notice "No reboot feature available; manual reboot required!"
   fi
