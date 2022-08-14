@@ -442,14 +442,14 @@ bashio::log.notice "Started Apache on ${MOTION_APACHE_HOST}:${MOTION_APACHE_PORT
 ###
 
 if [ ! -d /share/motion-ai ]; then
-  bashio::log.info "Cloning /share/motion-ai"
+  bashio::log.debug "Cloning /share/motion-ai"
   git clone http://github.com/motion-ai/motion-ai /share/motion-ai &> /dev/null
   INIT=1
 fi
 
 if [ -d /share/motion-ai ]; then
   pushd /share/motion-ai &> /dev/null
-  bashio::log.info "Updating /share/motion-ai"
+  bashio::log.debug "Updating /share/motion-ai"
   git checkout . &> /dev/null
   git pull &> /dev/null
   popd &> /dev/null
@@ -459,7 +459,7 @@ else
 fi
 
 if [ ! -d /share/ageathome ]; then
-  bashio::log.info "Cloning /share/ageathome"
+  bashio::log.debug "Cloning /share/ageathome"
   git clone http://github.com/ageathome/core /share/ageathome &> /dev/null
   INIT=1
 fi
@@ -467,12 +467,12 @@ fi
 if [ -d /share/ageathome ]; then
   pushd /share/ageathome &> /dev/null
   if [ ! -e motion-ai ] && [ -d /share/motion-ai ]; then
-    bashio::log.info "Linking /share/motion-ai"
+    bashio::log.debug "Linking /share/motion-ai"
     ln -s /share/motion-ai .
   elif [ ! -d /share/motion-ai ]; then
     bashio::log.error "Could not link to /share/motion-ai"
   fi
-  bashio::log.info "Updating /share/ageathome"
+  bashio::log.debug "Updating /share/ageathome"
   git checkout . &> /dev/null
   git pull &> /dev/null
   popd &> /dev/null
@@ -482,7 +482,7 @@ else
 fi
 
 if [ ! -e /config/setup.json ]; then
-  bashio::log.info "Initializing /share/ageathome"
+  bashio::log.debug "Initializing /share/ageathome"
   pushd /share/ageathome &> /dev/null
   MOTION_APP="Age@Home" HOST_NAME="ageathome" HOST_IPADDR="$(echo "${CONFIG:-null}" | jq -r '.network.ip')" \
     make homeassistant/setup.json &> /dev/null && mv homeassistant/setup.json /config
@@ -501,12 +501,12 @@ addon::setup.reload
 ###
 
 if [ -d /share/ageathome ] && [ -d /share/motion-ai ] && [ -e /config/setup.json ]; then
-  bashio::log.info "Updating /config from /share/ageathome/homeassistant"
+  bashio::log.debug "Updating /config from /share/ageathome/homeassistant"
   pushd /share/ageathome/homeassistant &> /dev/null
   todo=($(ls -1))
   rsync -a -L --delete "${todo[@]}" /config/ && bashio::log.info "Synchronization successful" || bashio::log.warning "Synchronization failed"
   popd &> /dev/null
-  bashio::log.info "Making /config"
+  bashio::log.debug "Making /config"
   pushd /config &> /dev/null
   MOTION_APP="Age@Home" \
     HOST_NAME="ageathome" \
@@ -529,9 +529,9 @@ fi
 if [ ${INIT:-0} != 0 ]; then
   local reboot=$(jq '.supervisor.info.data.features|index("reboot")>=0' $(motion.config.file))
   if [ "${reboot:-false)" = 'true' ]; then
-    bashio::log.notice "Requesting host reboot for intitialization"
+    bashio::log.info "Requesting host reboot for intitialization"
     reboot=$(curl -sSL -X POST -H "Authorization: Bearer ${SUPERVISOR_TOKEN}" -H "Content-Type: application/json" http://supervisor/host/reboot)
-    bashio::log.notice "Host reboot response: ${reboot:-null}"
+    bashio::log.info "Host reboot response: ${reboot:-null}"
   else
     bashio::log.notice "No reboot feature available; manual reboot required!"
   fi
@@ -543,7 +543,7 @@ while true; do
     ## publish configuration
     ( motion.mqtt.pub -r -q 2 -t "$(motion.config.group)/$(motion.config.device)/start" -f "$(motion.config.file)" &> /dev/null \
       && bashio::log.info "Published configuration to MQTT; topic: $(motion.config.group)/$(motion.config.device)/start" ) \
-      || bashio::log.notice "Failed to publish configuration to MQTT; config: $(motion.config.mqtt)"
+      || bashio::log.warn "Failed to publish configuration to MQTT; config: $(motion.config.mqtt)"
 
     ## sleep
     bashio::log.info "Sleeping; ${MOTION_WATCHDOG_INTERVAL:-1800} seconds ..."
