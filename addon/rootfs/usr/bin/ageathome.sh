@@ -281,7 +281,7 @@ function addon::config.mqtt()
     host=$(bashio::config "mqtt.host") 
     if [ "${host:-null}" = 'null' ]; then 
       host="${ip:-127.0.0.1}"
-      bashio::log.warn "${FUNCNAME[0]}: MQTT host configuration undefined; using host IP address: ${host:-}"
+      bashio::log.warning "${FUNCNAME[0]}: MQTT host configuration undefined; using host IP address: ${host:-}"
     fi
 
     # set from configuration with defaults
@@ -538,7 +538,7 @@ while true; do
     ## publish configuration
     ( motion.mqtt.pub -r -q 2 -t "$(motion.config.group)/$(motion.config.device)/start" -f "$(motion.config.file)" &> /dev/null \
       && bashio::log.info "Published configuration to MQTT; topic: $(motion.config.group)/$(motion.config.device)/start" ) \
-      || bashio::log.warn "Failed to publish configuration to MQTT; config: $(motion.config.mqtt)"
+      || bashio::log.warning "Failed to publish configuration to MQTT; config: $(motion.config.mqtt)"
 
     ## sleep
     bashio::log.info "Sleeping; ${MOTION_WATCHDOG_INTERVAL:-1800} seconds ..."
