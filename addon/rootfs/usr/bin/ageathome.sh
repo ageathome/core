@@ -378,8 +378,9 @@ function addon::config()
   location=$(addon::config.location)
   mqtt=$(addon::config.mqtt "${network:-}")
   options=$(addon::config.options)
+  supervisor=$(curl -X GET -H "Authorization: Bearer ${SUPERVISOR_TOKEN}" -H "Content-Type: application/json" http://supervisor/core/api/config)
 
-  echo '{"network":'${network:-null}',"timezone":"'${timezone:-}'","location":'${location:-null}',"overview":'${overview:-null}',"roles":'${roles:-null}',"mqtt":'${mqtt:-null}',"options":'${options:-null}'}'
+  echo '{"supervisor":'${supervisor:-null}'"network":'${network:-null}',"timezone":"'${timezone:-}'","location":'${location:-null}',"overview":'${overview:-null}',"roles":'${roles:-null}',"mqtt":'${mqtt:-null}',"options":'${options:-null}'}'
 }
 
 ###

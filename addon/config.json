@@ -1,5 +1,5 @@
 {
-  "version": "0.7.25",
+  "version": "0.7.26",
   "arch": [
     "aarch64",
     "amd64",
@@ -12,8 +12,8 @@
   "environment": {
     "LOG_FORMAT": "{LEVEL}: {MESSAGE}"
   },
-  "hassio_api": false,
   "hassio_role": "default",
+  "hassio_api": true,
   "homeassistant_api": true,
   "host_network": true,
   "image": "dcmartin/{arch}-addon-ageathome",
