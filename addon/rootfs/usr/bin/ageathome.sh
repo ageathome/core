@@ -14,9 +14,9 @@ function addon::setup.update()
   old=$(jq -r '.'"${e}"'?' /config/setup.json)
 
   if [ "${new:-null}" != 'null' ] &&  [ "${old:-}" != "${new:-}" ]; then
-    jq -c '.timestamp="'$(date -u '+%FT%TZ')'"|.'"${e}"'="'"${new}"'"' /config/setup.json > /tmp/setup.json.$$ && mv -f /tmp/setup.json.$$ /config/setup.json && bashio::log.debug "Updated ${e}: ${new}; old: ${old}" && update=1 || bashio::log.warning "Could not update ${e} to ${new}"
+    jq -c '.timestamp="'$(date -u '+%FT%TZ')'"|.'"${e}"'="'"${new}"'"' /config/setup.json > /tmp/setup.json.$$ && mv -f /tmp/setup.json.$$ /config/setup.json && bashio::log.debug "Updated ${e}: ${new}; old: ${old}" && update=1 || bashio::log.debug "Could not update ${e} to ${new}"
   elif [ "${new:-null}" == 'null' ] &&  [ "${old:-}" == "null" ]; then
-    jq -c '.timestamp="'$(date -u '+%FT%TZ')'"|.'"${e}"'="'"${new}"'"' /config/setup.json > /tmp/setup.json.$$ && mv -f /tmp/setup.json.$$ /config/setup.json && bashio::log.debug "Initialized ${e}: ${new}" && update=1 || bashio::log.warning "Could not initialize ${e} to ${new}"
+    jq -c '.timestamp="'$(date -u '+%FT%TZ')'"|.'"${e}"'="'"${new}"'"' /config/setup.json > /tmp/setup.json.$$ && mv -f /tmp/setup.json.$$ /config/setup.json && bashio::log.debug "Initialized ${e}: ${new}" && update=1 || bashio::log.debug "Could not initialize ${e} to ${new}"
   else
     bashio::log.debug "${FUNCNAME[0]} no change ${e}: ${old}; new: ${new}"
   fi
@@ -243,10 +243,10 @@ function addon::config.location()
         bashio::log.error "No coordinates in W3W results: ${results:-null}"
       fi
     else
-      bashio::log.warning "No W3W results: ${results:-null}"
+      bashio::log.debug "No W3W results: ${results:-null}"
     fi
   else
-    bashio::log.warning "No W3W words or apikey: ${w3w:-null}"
+    bashio::log.debug "No W3W words or apikey: ${w3w:-null}"
   fi
   latitude=$(addon::config.option latitude ${latitude})
   longitude=$(addon::config.option longitude ${longitude})
@@ -281,7 +281,7 @@ function addon::config.mqtt()
     host=$(bashio::config "mqtt.host") 
     if [ "${host:-null}" = 'null' ]; then 
       host="${ip:-127.0.0.1}"
-      bashio::log.warning "${FUNCNAME[0]}: MQTT host configuration undefined; using host IP address: ${host:-}"
+      bashio::log.debug "${FUNCNAME[0]}: MQTT host configuration undefined; using host IP address: ${host:-}"
     fi
 
     # set from configuration with defaults
@@ -538,7 +538,7 @@ while true; do
     ## publish configuration
     ( motion.mqtt.pub -r -q 2 -t "$(motion.config.group)/$(motion.config.device)/start" -f "$(motion.config.file)" &> /dev/null \
       && bashio::log.info "Published configuration to MQTT; topic: $(motion.config.group)/$(motion.config.device)/start" ) \
-      || bashio::log.warning "Failed to publish configuration to MQTT; config: $(motion.config.mqtt)"
+      || bashio::log.debug "Failed to publish configuration to MQTT; config: $(motion.config.mqtt)"
 
     ## sleep
     bashio::log.info "Sleeping; ${MOTION_WATCHDOG_INTERVAL:-1800} seconds ..."
