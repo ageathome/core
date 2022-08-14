@@ -353,7 +353,13 @@ function addon::config.init()
 {
   bashio::log.trace "${FUNCNAME[0]} ${*}"
 
-  local json='{"version":"'"${BUILD_VERSION:-}"'","config_path":"'"${CONFIG_PATH}"'","hostname":"'"$(hostname)"'","arch":"'$(arch)'","date":'$(date -u +%s)'}'
+  local info=$(curl -sSL -X GET -H "Authorization: Bearer ${SUPERVISOR_TOKEN}" -H "Content-Type: application/json" http://supervisor/info)
+  local config=$(curl -sSL -X GET -H "Authorization: Bearer ${SUPERVISOR_TOKEN}" -H "Content-Type: application/json" http://supervisor/core/api/config)
+  local services=$(curl -sSL -X GET -H "Authorization: Bearer ${SUPERVISOR_TOKEN}" -H "Content-Type: application/json" http://supervisor/services)
+  local network=$(addon::config.network)
+  local options=$(addon::config.options)
+
+  local json='{"supervisor":{"services":'${services:-null}',"config":'${config:-null}',"info":'${info:-null}'},"network":'${network:-null}',"version":"'"${BUILD_VERSION:-}"'","config_path":"'"${CONFIG_PATH}"'","hostname":"'"$(hostname)"'","arch":"'$(arch)'","date":'$(date -u +%s)'}'
 
   echo "${json}" | jq -Sc '.' > $(motion.config.file)
 }
@@ -365,24 +371,19 @@ function addon::config()
   bashio::log.trace "${FUNCNAME[0]} ${*}"
 
   local init=$(addon::config.init)
-  local network
   local timezone
   local location
   local mqtt
   local options
 
-  network=$(addon::config.network)
   timezone=$(addon::config.timezone)
   roles=$(addon::config.roles)
   overview=$(addon::config.overview)
   location=$(addon::config.location)
   mqtt=$(addon::config.mqtt "${network:-}")
-  options=$(addon::config.options)
-  info=$(curl -sSL -X GET -H "Authorization: Bearer ${SUPERVISOR_TOKEN}" -H "Content-Type: application/json" http://supervisor/info)
-  config=$(curl -sSL -X GET -H "Authorization: Bearer ${SUPERVISOR_TOKEN}" -H "Content-Type: application/json" http://supervisor/core/api/config)
-  services=$(curl -sSL -X GET -H "Authorization: Bearer ${SUPERVISOR_TOKEN}" -H "Content-Type: application/json" http://supervisor/services)
 
-  echo '{"supervisor":{"services":'${services:-null}',"config":'${config:-null}',"info":'${info:-null}'},"network":'${network:-null}',"timezone":"'${timezone:-}'","location":'${location:-null}',"overview":'${overview:-null}',"roles":'${roles:-null}',"mqtt":'${mqtt:-null}',"options":'${options:-null}'}'
+  echo '{
+"timezone":"'${timezone:-}'","location":'${location:-null}',"overview":'${overview:-null}',"roles":'${roles:-null}',"mqtt":'${mqtt:-null}',"options":'${options:-null}'}'
 }
 
 ###
