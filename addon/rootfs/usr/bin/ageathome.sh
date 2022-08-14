@@ -527,9 +527,14 @@ fi
 
 ## reboot host if INIT=1
 if [ ${INIT:-0} != 0 ]; then
-  bashio::log.notice "Requesting host reboot for intitialization"
-  reboot=$(curl -sSL -X POST -H "Authorization: Bearer ${SUPERVISOR_TOKEN}" -H "Content-Type: application/json" http://supervisor/host/reboot)
-  bashio::log.notice "Host reboot response: ${reboot:-null}"
+  local reboot=$(jq '.config.supervisor.info.data.features|index("reboot")>=0' $(motion.config.file))
+  if [ "${reboot:-false)" = 'true' ]; then
+    bashio::log.notice "Requesting host reboot for intitialization"
+    reboot=$(curl -sSL -X POST -H "Authorization: Bearer ${SUPERVISOR_TOKEN}" -H "Content-Type: application/json" http://supervisor/host/reboot)
+    bashio::log.notice "Host reboot response: ${reboot:-null}"
+  else
+    bashio::log.notice "No reboot feature available; manual reboot required!"
+  fi
 fi
 
 ## forever
