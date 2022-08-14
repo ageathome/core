@@ -380,8 +380,9 @@ function addon::config()
   options=$(addon::config.options)
   info=$(curl -X GET -H "Authorization: Bearer ${SUPERVISOR_TOKEN}" -H "Content-Type: application/json" http://supervisor/info)
   config=$(curl -X GET -H "Authorization: Bearer ${SUPERVISOR_TOKEN}" -H "Content-Type: application/json" http://supervisor/core/api/config)
+  services=$(curl -X GET -H "Authorization: Bearer ${SUPERVISOR_TOKEN}" -H "Content-Type: application/json" http://supervisor/services)
 
-  echo '{"supervisor":{"config":'${config:-null}',"info":'${info:-null}'},"network":'${network:-null}',"timezone":"'${timezone:-}'","location":'${location:-null}',"overview":'${overview:-null}',"roles":'${roles:-null}',"mqtt":'${mqtt:-null}',"options":'${options:-null}'}'
+  echo '{"supervisor":{"service":'${services:-null}',"config":'${config:-null}',"info":'${info:-null}'},"network":'${network:-null}',"timezone":"'${timezone:-}'","location":'${location:-null}',"overview":'${overview:-null}',"roles":'${roles:-null}',"mqtt":'${mqtt:-null}',"options":'${options:-null}'}'
 }
 
 ###
