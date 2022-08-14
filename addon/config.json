@@ -1,5 +1,5 @@
 {
-  "version": "0.7.23",
+  "version": "0.7.24",
   "arch": [
     "aarch64",
     "amd64",
@@ -108,7 +108,7 @@
     "unit_system": "list(imperial|metric)?",
     "wifi": {
       "ssid": "str?",
-      "password": "password?"
+      "password": "str?"
     },
     "w3w": {
       "apikey": "str?",
