@@ -518,16 +518,16 @@ elif [ ! -d /share/ageathome ]; then
   exit 1
 fi
 
-## fork process to on-board devices and set CoIoT for motion sensors
-# implement this code
+bashio::log.notice "Configuration complete"
 
 ## reboot host if INIT=1
 if [ ${INIT:-0} != 0 ]; then
   reboot=$(jq '.supervisor.info.data.features|index("reboot")>=0' "$(motion.config.file)")
   if [ "${reboot:-false}" = 'true' ]; then
-    bashio::log.debug "Requesting host reboot for intitialization"
+    bashio::log.info "Requesting host reboot for intitialization"
+    sleep 5
     reboot=$(curl -sSL -X POST -H "Authorization: Bearer ${SUPERVISOR_TOKEN}" -H "Content-Type: application/json" http://supervisor/host/reboot)
-    bashio::log.debug "Host reboot response: ${reboot:-null}"
+    bashio::log.info "Host reboot response: ${reboot:-null}"
   else
     bashio::log.notice "No reboot feature available; manual reboot required!"
   fi
@@ -542,7 +542,7 @@ while true; do
       || bashio::log.debug "Failed to publish configuration to MQTT; config: $(motion.config.mqtt)"
 
     ## sleep
-    bashio::log.info "Sleeping; ${MOTION_WATCHDOG_INTERVAL:-1800} seconds ..."
+    bashio::log.debug "Sleeping; ${MOTION_WATCHDOG_INTERVAL:-1800} seconds ..."
     sleep ${MOTION_WATCHDOG_INTERVAL:-1800}
 
 done
