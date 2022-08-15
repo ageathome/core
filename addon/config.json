@@ -1,5 +1,5 @@
 {
-  "version": "0.7.42",
+  "version": "0.7.43",
   "arch": [
     "aarch64",
     "amd64",
@@ -12,7 +12,7 @@
   "environment": {
     "LOG_FORMAT": "{LEVEL}: {MESSAGE}"
   },
-  "hassio_role": "default",
+  "hassio_role": "manager",
   "hassio_api": true,
   "homeassistant_api": true,
   "host_network": true,

@@ -355,10 +355,11 @@ function addon::config.init()
   bashio::log.trace "${FUNCNAME[0]} ${*}"
 
   local info=$(curl -sSL -X GET -H "Authorization: Bearer ${SUPERVISOR_TOKEN}" -H "Content-Type: application/json" http://supervisor/info)
+  local host=$(curl -sSL -X GET -H "Authorization: Bearer ${SUPERVISOR_TOKEN}" -H "Content-Type: application/json" http://supervisor/host/info)
   local config=$(curl -sSL -X GET -H "Authorization: Bearer ${SUPERVISOR_TOKEN}" -H "Content-Type: application/json" http://supervisor/core/api/config)
   local services=$(curl -sSL -X GET -H "Authorization: Bearer ${SUPERVISOR_TOKEN}" -H "Content-Type: application/json" http://supervisor/services)
 
-  local json='{"supervisor":{"services":'${services:-null}',"config":'${config:-null}',"info":'${info:-null}'},"version":"'"${BUILD_VERSION:-}"'","config_path":"'"${CONFIG_PATH}"'","hostname":"'"$(hostname)"'","arch":"'$(arch)'","date":'$(date -u +%s)'}'
+  local json='{"supervisor":{"services":'${services:-null}',"host":'${host:-null}',"config":'${config:-null}',"info":'${info:-null}'},"version":"'"${BUILD_VERSION:-}"'","config_path":"'"${CONFIG_PATH}"'","hostname":"'"$(hostname)"'","arch":"'$(arch)'","date":'$(date -u +%s)'}'
 
   echo "${json}" | jq -Sc '.' > $(motion.config.file)
 }
@@ -524,13 +525,31 @@ bashio::log.notice "Configuration complete"
 if [ ${INIT:-0} != 0 ]; then
   reboot=$(jq '.supervisor.info.data.features|index("reboot")>=0' "$(motion.config.file)")
   if [ "${reboot:-false}" = 'true' ]; then
+    TEMP=$(mktemp)
+
     bashio::log.info "Requesting host reboot for intitialization"
-    sleep 5
-    reboot=$(curl -sSL -X POST -H "Authorization: Bearer ${SUPERVISOR_TOKEN}" -H "Content-Type: application/json" http://supervisor/host/reboot)
-    bashio::log.info "Host reboot response: ${reboot:-null}"
+    reboot=$(curl -w '%{http_code}' -sSL -X POST -H "Authorization: Bearer ${SUPERVISOR_TOKEN}" -H "Content-Type: application/json" http://supervisor/host/reboot -o ${TEMP})
+    case ${reboot} in
+      403)
+        bashio::log.notice "Reboot forbidden; please manually reboot."
+        bashio::log.debug "$(jq -Sc . ${TEMP})"
+        ;;
+      404)
+        bashio::log.notice "Reboot not found; please manually reboot."
+        bashio::log.debug "$(jq -Sc . ${TEMP})"
+        ;;
+      200)
+        bashio::log.notice "Reboot initiated."
+        ;;
+      *)
+        bashio::log.notice "Reboot unknown: ${reboot:-null}; please reboot manually."
+        bashio::log.debug "$(jq -Sc . ${TEMP})"
+        ;;
+    esac
   else
     bashio::log.notice "No reboot feature available; manual reboot required!"
   fi
+  rm -f "${TEMP:-}"
 fi
 
 ## forever
