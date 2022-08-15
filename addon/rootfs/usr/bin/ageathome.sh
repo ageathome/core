@@ -527,7 +527,8 @@ if [ ${INIT:-0} != 0 ]; then
   if [ "${reboot:-false}" = 'true' ]; then
     TEMP=$(mktemp)
 
-    bashio::log.info "Requesting host reboot for intitialization"
+    bashio::log.info "Requesting host reboot for intitialization in 10 seconds ..."
+    sleep 10
     reboot=$(curl -w '%{http_code}' -sSL -X POST -H "Authorization: Bearer ${SUPERVISOR_TOKEN}" -H "Content-Type: application/json" http://supervisor/host/reboot -o ${TEMP})
     case ${reboot} in
       403)
