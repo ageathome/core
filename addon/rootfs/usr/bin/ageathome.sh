@@ -336,6 +336,7 @@ function addon::config.network()
 function addon::config.options()
 {
   bashio::log.trace "${FUNCNAME[0]} ${*}"
+
   local device=$(addon::config.option device "$(hostname -s)")
   local rssurl=$(addon::config.option uptimerobot_rssurl "unknown")
   local unit_system=$(addon::config.option unit_system "imperial")
@@ -356,7 +357,6 @@ function addon::config.init()
   local info=$(curl -sSL -X GET -H "Authorization: Bearer ${SUPERVISOR_TOKEN}" -H "Content-Type: application/json" http://supervisor/info)
   local config=$(curl -sSL -X GET -H "Authorization: Bearer ${SUPERVISOR_TOKEN}" -H "Content-Type: application/json" http://supervisor/core/api/config)
   local services=$(curl -sSL -X GET -H "Authorization: Bearer ${SUPERVISOR_TOKEN}" -H "Content-Type: application/json" http://supervisor/services)
-  local options=$(addon::config.options)
 
   local json='{"supervisor":{"services":'${services:-null}',"config":'${config:-null}',"info":'${info:-null}'},"version":"'"${BUILD_VERSION:-}"'","config_path":"'"${CONFIG_PATH}"'","hostname":"'"$(hostname)"'","arch":"'$(arch)'","date":'$(date -u +%s)'}'
 
@@ -376,6 +376,7 @@ function addon::config()
   local location=$(addon::config.location)
   local network=$(addon::config.network)
   local mqtt=$(addon::config.mqtt "${network:-}")
+  local options=$(addon::config.options)
 
   echo '{"timezone":"'${timezone:-}'","location":'${location:-null}',"network":'${network:-null}',"overview":'${overview:-null}',"roles":'${roles:-null}',"mqtt":'${mqtt:-null}',"options":'${options:-null}'}'
 }
