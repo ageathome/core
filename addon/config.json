@@ -1,9 +1,10 @@
 {
-  "version": "0.7.18",
+  "version": "0.7.44",
   "arch": [
     "aarch64",
     "amd64",
-    "armv7"
+    "armv7",
+    "i386"
   ],
   "audio": false,
   "boot": "auto",
@@ -11,8 +12,8 @@
   "environment": {
     "LOG_FORMAT": "{LEVEL}: {MESSAGE}"
   },
-  "hassio_api": false,
-  "hassio_role": "default",
+  "hassio_role": "manager",
+  "hassio_api": true,
   "homeassistant_api": true,
   "host_network": true,
   "image": "dcmartin/{arch}-addon-ageathome",
@@ -26,6 +27,7 @@
   "name": "Age@Home",
   "options": {
     "site": "My House",
+    "timezone": "America/Los_Angeles",
     "roles": {
       "person": "none",
       "primary": "none",
@@ -45,13 +47,12 @@
       "zoom": 18
     },
     "uptimerobot_rssurl": "",
-    "timezone": "America/Los_Angeles",
     "wifi": {
       "ssid": "",
       "password": ""
     },
     "w3w": {
-      "apikey": "APIKEY4U",
+      "apikey": "",
       "words": "///what.three.words"
     },
     "log_level": "info"
@@ -76,6 +77,7 @@
   },
   "schema": {
     "site": "str?",
+    "tag": "list(dev|alpha|beta|master|release)?",
     "client": "str?",
     "device": "str?",
     "elevation": "int?",
@@ -107,7 +109,7 @@
     "unit_system": "list(imperial|metric)?",
     "wifi": {
       "ssid": "str?",
-      "password": "password?"
+      "password": "str?"
     },
     "w3w": {
       "apikey": "str?",
