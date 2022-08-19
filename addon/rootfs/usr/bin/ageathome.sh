@@ -51,6 +51,8 @@ function addon::setup.reload()
           tf=$(addon::setup.update 'w3w.words' 'MOTION_W3W_WORDS') && update=$((update+tf))
           # uptimerobot 
           tf=$(addon::setup.update 'uptimerobot_rssurl' 'UPTIMEROBOT_RSSURL') && update=$((update+tf))
+          # iperf3
+          tf=$(addon::setup.update 'iperf3_host' 'IPERF3_HOST') && update=$((update+tf))
           # router
           tf=$(addon::setup.update 'router_name' 'MOTION_ROUTER_NAME') && update=$((update+tf))
           # host
@@ -339,13 +341,14 @@ function addon::config.options()
 
   local device=$(addon::config.option device "$(hostname -s)")
   local rssurl=$(addon::config.option uptimerobot_rssurl "unknown")
+  local iperf=$(addon::config.option iperf3_host "127.0.0.1")
   local unit_system=$(addon::config.option unit_system "imperial")
   local site=$(addon::config.option site "My House")
   local group=$(addon::config.option group "motion")
   local client=$(addon::config.option client "+")
   local share_dir=$(addon::config.option share_dir "/share/${group:-motion}")
 
-  echo '{"device":"'${device:-}'","rssurl":"'${rssurl:-}'","unit_system":"'${unit_system:-}'","share_dir":"'${share_dir:-}'","site":"'${site:-}'","group":"'${group:-}'","client":"'${client:-}'"}'
+  echo '{"device":"'${device:-}'","iperf3":"'${iperf3:-}'","rssurl":"'${rssurl:-}'","unit_system":"'${unit_system:-}'","share_dir":"'${share_dir:-}'","site":"'${site:-}'","group":"'${group:-}'","client":"'${client:-}'"}'
 }
 
 # init
