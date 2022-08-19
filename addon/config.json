@@ -1,5 +1,5 @@
 {
-  "version": "0.7.46",
+  "version": "0.7.47",
   "arch": [
     "aarch64",
     "amd64",
@@ -46,7 +46,7 @@
       "mode": "local",
       "zoom": 18
     },
-    "iperf3_host": "",
+    "iperf_host": "",
     "uptimerobot_rssurl": "",
     "wifi": {
       "ssid": "",
@@ -106,7 +106,7 @@
     },
     "reload": "bool?",
     "timezone": "str?",
-    "iperf3_host": "str?",
+    "iperf_host": "str?",
     "uptimerobot_rssurl": "str?",
     "unit_system": "list(imperial|metric)?",
     "wifi": {
