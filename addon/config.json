@@ -1,5 +1,5 @@
 {
-  "version": "0.7.50",
+  "version": "0.7.51",
   "arch": [
     "aarch64",
     "amd64",
@@ -56,7 +56,7 @@
       "apikey": "",
       "words": "///what.three.words"
     },
-    "log_level": "info"
+    "log_level": "notice"
   },
   "panel_admin": true,
   "panel_icon": "mdi:home-heart",
@@ -84,7 +84,7 @@
     "elevation": "int?",
     "group": "str?",
     "latitude": "float?",
-    "log_level": "str",
+    "log_level": "list(off|debug|info|notice|alert|critical)",
     "longitude": "float?",
     "mqtt": {
       "host": "str?",
