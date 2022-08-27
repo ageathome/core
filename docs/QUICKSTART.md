@@ -30,15 +30,9 @@ Selecting the item displays `Info` and `Documentation` panels for the add-on sim
 
 Optionally review documentation and click on `INSTALL`
 
-## 3. Configure and start
+## 3. Start Age@Home
 
-Once the add-on has been installed it will appear with additional panels for `Configuration` and `Log`  
-
-Change to the `Configuration` panel and specify required information similar to the image below.
-
-<img width="75%" src='ageathome-configure.png'>
-
-Return to the `Info` panel and enable the options for _Watchdog_, _Auto update_, and _Show in sidebar_ similar to the image above.
+Once the add-on has been installed it will display options for _Start on Boot_, _Watchdog_, _Auto update_, and _Show in sidebar_ similar to the image below.
 
 <img width="50%" src='ageathome-installed.png'>
 
@@ -46,6 +40,5 @@ Start the add-on by clicking `START` on the lower-left.  After a few momenets th
 
 <img width="50%" src='ageathome-started.png'>
 
-## 4. Reboot
-Once the Age@Home add-on has completed initialization the hub requires a reboot.  The simplest way is to unplug the hub and plug it back in; alternatively navigate to [settings](http://homeassistant.local:8123/lovelace-owner/settings) and click the button for "Reboot" as in the image below:
+Once the Age@Home add-on has completed initialization it will reboot the hub.
 
