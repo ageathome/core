@@ -36,6 +36,11 @@ zeroconf:
 zone:
 homekit:
 
+lovelace:
+  resources:
+    - url: /local/resources/modules/apexcharts-card.js?v=2.0.1
+      type: module
+
 tts:
   - platform: google_translate
 
