@@ -1,5 +1,5 @@
 {
-  "version": "0.7.53",
+  "version": "0.7.54",
   "arch": [
     "aarch64",
     "amd64",
@@ -28,6 +28,16 @@
   "options": {
     "site": "My House",
     "timezone": "America/Los_Angeles",
+    "motionai": {
+      "url": "https://github.com/motion-ai/motion-ai",
+      "branch": "master",
+      "tag": "dev"
+    },
+    "ageathome": {
+      "url": "https://github.com/ageathome/core",
+      "branch": "master",
+      "tag": "dev"
+    },
     "roles": {
       "person": "none",
       "primary": "none",
