@@ -44,7 +44,7 @@ function addon::setup.reload()
 
         # check configuration (timezone, latitude, longitude, mqtt, group, device, client)
         if [ -e /config/setup.json ]; then
-          # w3w
+          # site
           tf=$(addon::setup.update 'site' 'MOTION_SITE') && update=$((update+tf))
           # w3w
           tf=$(addon::setup.update 'w3w.apikey' 'MOTION_W3W_APIKEY') && update=$((update+tf))
@@ -218,6 +218,22 @@ function addon::config.roles()
   echo '{"person":"'${person:-}'","primary":"'${primary:-}'","secondary":"'${secondary:-}'","tertiary":"'${tertiary:-}'"}'
 }
 
+## repo
+
+function addon::config.repo()
+{
+  bashio::log.trace "${FUNCNAME[0]} ${*}"
+
+  local mai_url=$(addon::config.option repo.motionai.url "https://github.com/motion-ai/motion-ai")
+  local mai_tag=$(addon::config.option repo.motionai.tag "dev")
+  local mai_branch=$(addon::config.option repo.motionai.branch "master")
+
+  local aah_url=$(addon::config.option repo.ageathome.url "https://github.com/ageathome/core")
+  local aah_tag=$(addon::config.option repo.ageathome.tag "dev")
+  local aah_branch=$(addon::config.option repo.ageathome.branch "master")
+
+  echo '{"motionai":{"url":"'${mai_url:-}'","branch":"'${mai_branch:-}'","tag":"'${mai_tag:-}'"},"ageathome":{"url":"'${aah_url:-}'","branch":"'${aah_branch:-}'","tag":"'${aah_tag:-}'"}}'
+
 ## location
 
 function addon::config.location()
@@ -376,13 +392,14 @@ function addon::config()
   local init=$(addon::config.init)
   local timezone=$(addon::config.timezone)
   local roles=$(addon::config.roles)
+  local repo=$(addon::config.repo)
   local overview=$(addon::config.overview)
   local location=$(addon::config.location)
   local network=$(addon::config.network)
   local mqtt=$(addon::config.mqtt "${network:-}")
   local options=$(addon::config.options)
 
-  echo '{"timezone":"'${timezone:-}'","location":'${location:-null}',"network":'${network:-null}',"overview":'${overview:-null}',"roles":'${roles:-null}',"mqtt":'${mqtt:-null}',"options":'${options:-null}'}'
+  echo '{"timezone":"'${timezone:-}'","location":'${location:-null}',"network":'${network:-null}',"overview":'${overview:-null}',"repo":'${repo:-null}',"roles":'${roles:-null}',"mqtt":'${mqtt:-null}',"options":'${options:-null}'}'
 }
 
 ###
@@ -441,45 +458,97 @@ bashio::log.debug "Started Apache on ${MOTION_APACHE_HOST}:${MOTION_APACHE_PORT}
 # download YAML, etc..
 ###
 
-if [ ! -d /share/motion-ai ]; then
-  bashio::log.debug "Cloning /share/motion-ai"
-  git clone http://github.com/motion-ai/motion-ai /share/motion-ai &> /dev/null
-  INIT=1
-fi
+## MotionÃ👁
 
-if [ -d /share/motion-ai ]; then
-  pushd /share/motion-ai &> /dev/null
-  bashio::log.debug "Updating /share/motion-ai"
-  git checkout . &> /dev/null
-  git pull &> /dev/null
-  popd &> /dev/null
+tag=$(echo "${CONFIG:-null}" | jq -r '.repo.motionai.tag')
+if [ "${tag:-dev}" != 'dev' ]; then
+  bashio::log.debug "MotionÃ👁 - Tag dev not supported (yet); defaulting to dev"
+  tag='dev'
 else
-  bashio::log.fatal "Cannot find /share/motion-ai"
-  exit 1
+  bashio::log.debug "MotionÃ👁 tag: ${tag}"
 fi
 
-if [ ! -d /share/ageathome ]; then
-  bashio::log.debug "Cloning /share/ageathome"
-  git clone http://github.com/ageathome/core /share/ageathome &> /dev/null
-  INIT=1
-fi
-
-if [ -d /share/ageathome ]; then
-  pushd /share/ageathome &> /dev/null
-  if [ ! -e motion-ai ] && [ -d /share/motion-ai ]; then
-    bashio::log.debug "Linking /share/motion-ai"
-    ln -s /share/motion-ai .
-  elif [ ! -d /share/motion-ai ]; then
-    bashio::log.error "Could not link to /share/motion-ai"
+if [ "${tag:-dev}" == 'dev' ]; then
+  if [ ! -d /share/motion-ai ]; then
+    url=$(echo "${CONFIG:-null}" | jq -r '.repo.motionai.url')
+    bashio::log.debug "MotionÃ👁 url: ${url}"
+  
+    bashio::log.debug "Cloning /share/motion-ai"
+    git clone http://github.com/motion-ai/motion-ai /share/motion-ai &> /dev/null
+    INIT=1
   fi
-  bashio::log.debug "Updating /share/ageathome"
-  git checkout . &> /dev/null
-  git pull &> /dev/null
-  popd &> /dev/null
-else
-  bashio::log.fatal "Cannot find /share/ageathome"
-  exit 1
 fi
+
+if [ "${tag:-dev}" == 'dev' ]; then
+  if [ -d /share/motion-ai ]; then
+    branch=$(echo "${CONFIG:-null}" | jq -r '.repo.motionai.branch')
+  
+    if [ "${branch:-}" != 'master' ]; then
+      bashio::log.debug "MotionÃ👁 branch not supported (yet); defaulting to master"
+      branch='master'
+    else 
+      bashio::log.debug "MotionÃ👁 branch: ${branch}"
+    fi
+    pushd /share/motion-ai &> /dev/null
+    bashio::log.debug "Updating /share/motion-ai"
+    git checkout . &> /dev/null
+    git pull &> /dev/null
+    popd &> /dev/null
+  else
+    bashio::log.fatal "Cannot find /share/motion-ai"
+    exit 1
+  fi
+fi
+
+## Age@Home
+
+tag=$(echo "${CONFIG:-null}" | jq -r '.repo.ageathome.tag')
+if [ "${tag:-dev}" != 'dev' ]; then
+  bashio::log.debug "Tag dev not supported (yet); defaulting to dev"
+  tag='dev'
+else
+  bashio::log.debug "Age@Home tag: ${tag}"
+fi
+
+if [ "${tag:-dev}" == 'dev' ]; then
+  if [ ! -d /share/ageathome ]; then
+    url=$(echo "${CONFIG:-null}" | jq -r '.repo.ageathome.url')
+    bashio::log.debug "Age@Home url: ${url}"
+
+    bashio::log.debug "Cloning /share/ageathome"
+    git clone http://github.com/ageathome/core /share/ageathome &> /dev/null
+    INIT=1
+  fi
+fi
+
+if [ "${tag:-dev}" == 'dev' ]; then
+  if [ -d /share/ageathome ]; then
+    branch=$(echo "${CONFIG:-null}" | jq -r '.repo.ageathome.branch')
+
+    if [ "${branch:-}" != 'master' ]; then
+      bashio::log.debug "Age@Home branch not supported (yet); defaulting to master"
+      branch='master'
+    else 
+      bashio::log.debug "Age@Home branch: ${branch}"
+    fi
+    pushd /share/ageathome &> /dev/null
+    if [ ! -e motion-ai ] && [ -d /share/motion-ai ]; then
+      bashio::log.debug "Linking /share/motion-ai"
+      ln -s /share/motion-ai .
+    elif [ ! -d /share/motion-ai ]; then
+      bashio::log.error "Could not link to /share/motion-ai"
+    fi
+    bashio::log.debug "Updating /share/ageathome"
+    git checkout . &> /dev/null
+    git pull &> /dev/null
+    popd &> /dev/null
+  else
+    bashio::log.fatal "Cannot find /share/ageathome"
+    exit 1
+  fi
+fi
+
+## setup.json
 
 if [ ! -e /config/setup.json ]; then
   bashio::log.debug "Initializing /share/ageathome"
@@ -489,10 +558,6 @@ if [ ! -e /config/setup.json ]; then
   popd &> /dev/null
   INIT=1
 fi
-
-###
-# reload setup
-###
 
 addon::setup.reload
 
@@ -514,15 +579,17 @@ if [ -d /share/ageathome ] && [ -d /share/motion-ai ] && [ -e /config/setup.json
     PACKAGES="" \
     make &> /dev/null
   popd &> /dev/null
+  bashio::log.notice "Configuration complete"
 elif [ ! -e /config/setup.json ]; then
   bashio::log.fatal "Cannot find /config/setup.json"
   exit 1
 elif [ ! -d /share/ageathome ]; then
   bashio::log.fatal "Cannot find /share/ageathome"
   exit 1
+elif [ ! -d /share/motion-ai ]; then
+  bashio::log.fatal "Cannot find /share/motion-ai"
+  exit 1
 fi
-
-bashio::log.notice "Configuration complete"
 
 ## reboot host if INIT=1
 if [ ${INIT:-0} != 0 ]; then
@@ -530,7 +597,7 @@ if [ ${INIT:-0} != 0 ]; then
   if [ "${reboot:-false}" = 'true' ]; then
     TEMP=$(mktemp)
 
-    bashio::log.info "Requesting host reboot for intitialization in 10 seconds ..."
+    bashio::log.notice "Requesting host reboot for intitialization in 10 seconds ..."
     sleep 10
     reboot=$(curl -w '%{http_code}' -sSL -X POST -H "Authorization: Bearer ${SUPERVISOR_TOKEN}" -H "Content-Type: application/json" http://supervisor/host/reboot -o ${TEMP})
     case ${reboot} in

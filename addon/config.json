@@ -1,5 +1,5 @@
 {
-  "version": "0.7.51",
+  "version": "0.7.52",
   "arch": [
     "aarch64",
     "amd64",
@@ -78,7 +78,18 @@
   },
   "schema": {
     "site": "str?",
-    "tag": "list(dev|alpha|beta|master|release)?",
+    "repo": {
+      "motionai": {
+        "url": "str?",
+        "branch": "list(test|alpha|beta|master)?",
+        "tag": "list(dev|pre|release)?"
+      },
+      "ageathome": {
+        "url": "str?",
+        "branch": "list(test|alpha|beta|master)?",
+        "tag": "list(dev|pre|release)?"
+      }
+    },
     "client": "str?",
     "device": "str?",
     "elevation": "int?",
