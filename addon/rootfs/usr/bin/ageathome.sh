@@ -224,13 +224,13 @@ function addon::config.repo()
 {
   bashio::log.trace "${FUNCNAME[0]} ${*}"
 
-  local mai_url=$(addon::config.option repo.motionai.url "https://github.com/motion-ai/motion-ai")
-  local mai_tag=$(addon::config.option repo.motionai.tag "dev")
-  local mai_branch=$(addon::config.option repo.motionai.branch "master")
+  local mai_url=$(addon::config.option motionai.url "https://github.com/motion-ai/motion-ai")
+  local mai_tag=$(addon::config.option motionai.tag "dev")
+  local mai_branch=$(addon::config.option motionai.branch "master")
 
-  local aah_url=$(addon::config.option repo.ageathome.url "https://github.com/ageathome/core")
-  local aah_tag=$(addon::config.option repo.ageathome.tag "dev")
-  local aah_branch=$(addon::config.option repo.ageathome.branch "master")
+  local aah_url=$(addon::config.option ageathome.url "https://github.com/ageathome/core")
+  local aah_tag=$(addon::config.option ageathome.tag "dev")
+  local aah_branch=$(addon::config.option ageathome.branch "master")
 
   echo '{"motionai":{"url":"'${mai_url:-}'","branch":"'${mai_branch:-}'","tag":"'${mai_tag:-}'"},"ageathome":{"url":"'${aah_url:-}'","branch":"'${aah_branch:-}'","tag":"'${aah_tag:-}'"}}'
 
@@ -460,7 +460,7 @@ bashio::log.debug "Started Apache on ${MOTION_APACHE_HOST}:${MOTION_APACHE_PORT}
 
 ## MotionÃ👁
 
-tag=$(echo "${CONFIG:-null}" | jq -r '.repo.motionai.tag')
+tag=$(echo "${CONFIG:-null}" | jq -r '.motionai.tag')
 if [ "${tag:-dev}" != 'dev' ]; then
   bashio::log.debug "MotionÃ👁 - Tag dev not supported (yet); defaulting to dev"
   tag='dev'
@@ -470,7 +470,7 @@ fi
 
 if [ "${tag:-dev}" == 'dev' ]; then
   if [ ! -d /share/motion-ai ]; then
-    url=$(echo "${CONFIG:-null}" | jq -r '.repo.motionai.url')
+    url=$(echo "${CONFIG:-null}" | jq -r '.motionai.url')
     bashio::log.debug "MotionÃ👁 url: ${url}"
   
     bashio::log.debug "Cloning /share/motion-ai"
@@ -481,7 +481,7 @@ fi
 
 if [ "${tag:-dev}" == 'dev' ]; then
   if [ -d /share/motion-ai ]; then
-    branch=$(echo "${CONFIG:-null}" | jq -r '.repo.motionai.branch')
+    branch=$(echo "${CONFIG:-null}" | jq -r '.motionai.branch')
   
     if [ "${branch:-}" != 'master' ]; then
       bashio::log.debug "MotionÃ👁 branch not supported (yet); defaulting to master"
@@ -502,7 +502,7 @@ fi
 
 ## Age@Home
 
-tag=$(echo "${CONFIG:-null}" | jq -r '.repo.ageathome.tag')
+tag=$(echo "${CONFIG:-null}" | jq -r '.ageathome.tag')
 if [ "${tag:-dev}" != 'dev' ]; then
   bashio::log.debug "Tag dev not supported (yet); defaulting to dev"
   tag='dev'
@@ -512,7 +512,7 @@ fi
 
 if [ "${tag:-dev}" == 'dev' ]; then
   if [ ! -d /share/ageathome ]; then
-    url=$(echo "${CONFIG:-null}" | jq -r '.repo.ageathome.url')
+    url=$(echo "${CONFIG:-null}" | jq -r '..ageathome.url')
     bashio::log.debug "Age@Home url: ${url}"
 
     bashio::log.debug "Cloning /share/ageathome"
@@ -523,7 +523,7 @@ fi
 
 if [ "${tag:-dev}" == 'dev' ]; then
   if [ -d /share/ageathome ]; then
-    branch=$(echo "${CONFIG:-null}" | jq -r '.repo.ageathome.branch')
+    branch=$(echo "${CONFIG:-null}" | jq -r '.ageathome.branch')
 
     if [ "${branch:-}" != 'master' ]; then
       bashio::log.debug "Age@Home branch not supported (yet); defaulting to master"
