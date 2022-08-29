@@ -459,25 +459,29 @@ bashio::log.debug "Started Apache on ${MOTION_APACHE_HOST}:${MOTION_APACHE_PORT}
 # download YAML, etc..
 ###
 
-## MotionÃ👁
+## motionai
 
 tag=$(echo "${CONFIG:-null}" | jq -r '.motionai.tag?')
 if [ "${tag:-dev}" != 'dev' ]; then
-  bashio::log.debug "MotionÃ👁 - Tag dev not supported (yet); defaulting to dev"
+  bashio::log.debug "motionai - tag ${tag} not supported (yet); defaulting to dev"
   tag='dev'
 else
-  bashio::log.debug "MotionÃ👁 tag: ${tag}"
+  bashio::log.debug "motionai tag: ${tag}"
 fi
 
 if [ "${tag:-dev}" == 'dev' ]; then
   if [ ! -d /share/motion-ai ]; then
     url=$(echo "${CONFIG:-null}" | jq -r '.motionai.url?')
-    bashio::log.debug "MotionÃ👁 url: ${url}"
+    bashio::log.debug "motionai url: ${url}"
   
     bashio::log.debug "Cloning /share/motion-ai"
     git clone http://github.com/motion-ai/motion-ai /share/motion-ai &> /dev/null
     INIT=1
+  else
+    bashio::log.debug "Exists: /share/motion-ai"
   fi
+else
+  bashio::log.debug "motionai - update non-dev; TBD"
 fi
 
 if [ "${tag:-dev}" == 'dev' ]; then
@@ -485,10 +489,10 @@ if [ "${tag:-dev}" == 'dev' ]; then
     branch=$(echo "${CONFIG:-null}" | jq -r '.motionai.branch?')
   
     if [ "${branch:-}" != 'master' ]; then
-      bashio::log.debug "MotionÃ👁 branch not supported (yet); defaulting to master"
+      bashio::log.debug "motionai branch ${branch} not supported (yet); defaulting to master"
       branch='master'
     else 
-      bashio::log.debug "MotionÃ👁 branch: ${branch}"
+      bashio::log.debug "motionai branch: ${branch}"
     fi
     pushd /share/motion-ai &> /dev/null
     bashio::log.debug "Updating /share/motion-ai"
@@ -501,25 +505,29 @@ if [ "${tag:-dev}" == 'dev' ]; then
   fi
 fi
 
-## Age@Home
+## ageathome
 
 tag=$(echo "${CONFIG:-null}" | jq -r '.ageathome.tag?')
 if [ "${tag:-dev}" != 'dev' ]; then
-  bashio::log.debug "Tag dev not supported (yet); defaulting to dev"
+  bashio::log.debug "ageathome - tag ${tag} not supported (yet); defaulting to dev"
   tag='dev'
 else
-  bashio::log.debug "Age@Home tag: ${tag}"
+  bashio::log.debug "ageathome tag: ${tag}"
 fi
 
 if [ "${tag:-dev}" == 'dev' ]; then
   if [ ! -d /share/ageathome ]; then
     url=$(echo "${CONFIG:-null}" | jq -r '..ageathome.url?')
-    bashio::log.debug "Age@Home url: ${url}"
+    bashio::log.debug "ageathome url: ${url}"
 
     bashio::log.debug "Cloning /share/ageathome"
     git clone http://github.com/ageathome/core /share/ageathome &> /dev/null
     INIT=1
+  else
+    bashio::log.debug "Exists: /share/ageathome"
   fi
+else
+  bashio::log.debug "ageathome - update non-dev; TBD"
 fi
 
 if [ "${tag:-dev}" == 'dev' ]; then
@@ -527,10 +535,10 @@ if [ "${tag:-dev}" == 'dev' ]; then
     branch=$(echo "${CONFIG:-null}" | jq -r '.ageathome.branch?')
 
     if [ "${branch:-}" != 'master' ]; then
-      bashio::log.debug "Age@Home branch not supported (yet); defaulting to master"
+      bashio::log.debug "ageathome branch ${branch} not supported (yet); defaulting to master"
       branch='master'
     else 
-      bashio::log.debug "Age@Home branch: ${branch}"
+      bashio::log.debug "ageathome branch: ${branch}"
     fi
     pushd /share/ageathome &> /dev/null
     if [ ! -e motion-ai ] && [ -d /share/motion-ai ]; then
