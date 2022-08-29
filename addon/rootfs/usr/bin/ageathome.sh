@@ -461,7 +461,7 @@ bashio::log.debug "Started Apache on ${MOTION_APACHE_HOST}:${MOTION_APACHE_PORT}
 
 ## motionai
 
-tag=$(echo "${CONFIG:-null}" | jq -r '.motionai.tag?')
+tag=$(echo "${CONFIG:-null}" | jq -r '.repo.motionai.tag?')
 if [ "${tag:-dev}" != 'dev' ]; then
   bashio::log.debug "motionai - tag ${tag} not supported (yet); defaulting to dev"
   tag='dev'
@@ -471,7 +471,7 @@ fi
 
 if [ "${tag:-dev}" == 'dev' ]; then
   if [ ! -d /share/motion-ai ]; then
-    url=$(echo "${CONFIG:-null}" | jq -r '.motionai.url?')
+    url=$(echo "${CONFIG:-null}" | jq -r '.repo.motionai.url?')
     bashio::log.debug "motionai url: ${url}"
   
     bashio::log.debug "Cloning /share/motion-ai"
@@ -486,7 +486,7 @@ fi
 
 if [ "${tag:-dev}" == 'dev' ]; then
   if [ -d /share/motion-ai ]; then
-    branch=$(echo "${CONFIG:-null}" | jq -r '.motionai.branch?')
+    branch=$(echo "${CONFIG:-null}" | jq -r '.repo.motionai.branch?')
   
     if [ "${branch:-}" != 'master' ]; then
       bashio::log.debug "motionai branch ${branch} not supported (yet); defaulting to master"
@@ -507,7 +507,7 @@ fi
 
 ## ageathome
 
-tag=$(echo "${CONFIG:-null}" | jq -r '.ageathome.tag?')
+tag=$(echo "${CONFIG:-null}" | jq -r '.repo.ageathome.tag?')
 if [ "${tag:-dev}" != 'dev' ]; then
   bashio::log.debug "ageathome - tag ${tag} not supported (yet); defaulting to dev"
   tag='dev'
@@ -517,7 +517,7 @@ fi
 
 if [ "${tag:-dev}" == 'dev' ]; then
   if [ ! -d /share/ageathome ]; then
-    url=$(echo "${CONFIG:-null}" | jq -r '..ageathome.url?')
+    url=$(echo "${CONFIG:-null}" | jq -r '.repo.ageathome.url?')
     bashio::log.debug "ageathome url: ${url}"
 
     bashio::log.debug "Cloning /share/ageathome"
@@ -532,7 +532,7 @@ fi
 
 if [ "${tag:-dev}" == 'dev' ]; then
   if [ -d /share/ageathome ]; then
-    branch=$(echo "${CONFIG:-null}" | jq -r '.ageathome.branch?')
+    branch=$(echo "${CONFIG:-null}" | jq -r '.repo.ageathome.branch?')
 
     if [ "${branch:-}" != 'master' ]; then
       bashio::log.debug "ageathome branch ${branch} not supported (yet); defaulting to master"
