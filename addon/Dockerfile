@@ -14,6 +14,7 @@ RUN apk add --no-cache \
   findutils \
   gettext \
   gawk \
+  tar \
   jq \
   git
 

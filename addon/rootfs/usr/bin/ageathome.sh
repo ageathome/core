@@ -506,7 +506,7 @@ if [ "${release:-null}" != 'null' ] && [ "${release:-null}" != 'latest' ]; then
   download=/share/motionai-${release##*/}
 
   if [ -s "${download}" ]; then
-    tar tzvf ${download} 2>&1 /dev/null \
+    tar tzf ${download} 2>&1 /dev/null \
       && \
       bashio::log.debug "motionai - inspected ${download}; no download required" \
       || \
@@ -522,7 +522,7 @@ if [ "${release:-null}" != 'null' ] && [ "${release:-null}" != 'latest' ]; then
   fi
 
   if [ -s "${download}" ]; then
-    tar tzvf ${download} 2>&1 /dev/null \
+    tar tzf ${download} 2>&1 /dev/null \
       && \
       bashio::log.debug "motionai - successfully inspected: ${download}" \
       || \
