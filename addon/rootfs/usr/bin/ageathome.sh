@@ -227,12 +227,14 @@ function addon::config.repo()
   local mai_url=$(addon::config.option motionai.url "https://github.com/motion-ai/motion-ai")
   local mai_tag=$(addon::config.option motionai.tag "dev")
   local mai_branch=$(addon::config.option motionai.branch "master")
+  local mai_release=$(addon::config.option motionai.release "none")
 
   local aah_url=$(addon::config.option ageathome.url "https://github.com/ageathome/core")
   local aah_tag=$(addon::config.option ageathome.tag "dev")
   local aah_branch=$(addon::config.option ageathome.branch "master")
+  local aah_release=$(addon::config.option ageathome.release "none")
 
-  echo '{"motionai":{"url":"'${mai_url:-}'","branch":"'${mai_branch:-}'","tag":"'${mai_tag:-}'"},"ageathome":{"url":"'${aah_url:-}'","branch":"'${aah_branch:-}'","tag":"'${aah_tag:-}'"}}'
+  echo '{"motionai":{"url":"'${mai_url:-}'","release":"'${mai_release:-}'","branch":"'${mai_branch:-}'","tag":"'${mai_tag:-}'"},"ageathome":{"url":"'${aah_url:-}'","release":"'${aah_release:-}'","branch":"'${aah_branch:-}'","tag":"'${aah_tag:-}'"}}'
 }
 
 ## location
@@ -463,7 +465,8 @@ bashio::log.debug "Started Apache on ${MOTION_APACHE_HOST}:${MOTION_APACHE_PORT}
 
 tag=$(echo "${CONFIG:-null}" | jq -r '.repo.motionai.tag?')
 if [ "${tag:-dev}" != 'dev' ]; then
-  bashio::log.debug "motionai - tag ${tag} not supported (yet); defaulting to dev"
+  release=$(echo "${CONFIG:-null}" | jq -r '.repo.motionai.release?')
+  bashio::log.debug "motionai - tag ${tag}; release: ${release} not supported (yet); defaulting to dev"
   tag='dev'
 else
   bashio::log.debug "motionai tag: ${tag}"
@@ -480,8 +483,17 @@ if [ "${tag:-dev}" == 'dev' ]; then
   else
     bashio::log.debug "Exists: /share/motion-ai"
   fi
+elif [ "${tag:-dev}" == 'release' ]; then
+  release=$(echo "${CONFIG:-null}" | jq -r '.repo.motionai.release?')
+
+  if [ "${release:-null}" != 'null' ]; then
+    bashio::log.debug "motionai - release: ${release:-null}"
+  else
+    bashio::log.debug "motionai - no release specified; defaulting to latest"
+    release='latest'
+  fi
 else
-  bashio::log.debug "motionai - update non-dev; TBD"
+  bashio::log.debug "motionai - update tag: ${tag}; release: ${release}: not supported (yet)"
 fi
 
 if [ "${tag:-dev}" == 'dev' ]; then
@@ -509,7 +521,8 @@ fi
 
 tag=$(echo "${CONFIG:-null}" | jq -r '.repo.ageathome.tag?')
 if [ "${tag:-dev}" != 'dev' ]; then
-  bashio::log.debug "ageathome - tag ${tag} not supported (yet); defaulting to dev"
+  release=$(echo "${CONFIG:-null}" | jq -r '.repo.ageathome.release?')
+  bashio::log.debug "ageathome - tag ${tag}; release: ${release} not supported (yet); defaulting to dev"
   tag='dev'
 else
   bashio::log.debug "ageathome tag: ${tag}"
@@ -526,8 +539,10 @@ if [ "${tag:-dev}" == 'dev' ]; then
   else
     bashio::log.debug "Exists: /share/ageathome"
   fi
+elif [ "${tag:-dev}" == 'release' ]; then
+  bashio::log.debug "ageathome - release"
 else
-  bashio::log.debug "ageathome - update non-dev; TBD"
+  bashio::log.debug "ageathome - update tag: ${tag}; release: ${release}: not supported (yet)"
 fi
 
 if [ "${tag:-dev}" == 'dev' ]; then

@@ -1,5 +1,5 @@
 {
-  "version": "0.7.60",
+  "version": "0.7.61",
   "arch": [
     "aarch64",
     "amd64",
@@ -31,7 +31,8 @@
     "motionai": {
       "url": "https://github.com/motion-ai/motion-ai",
       "branch": "master",
-      "tag": "dev"
+      "tag": "release",
+      "release": "https://github.com/motion-ai/motion-ai/archive/refs/tags/2022.09.02.tar.gz"
     },
     "ageathome": {
       "url": "https://github.com/ageathome/core",
@@ -91,12 +92,14 @@
     "motionai": {
       "url": "str?",
       "branch": "list(test|alpha|beta|master)?",
-      "tag": "list(dev|pre|release)?"
+      "tag": "list(dev|pre|release)?",
+      "release": "str?"
     },
     "ageathome": {
       "url": "str?",
       "branch": "list(test|alpha|beta|master)?",
-      "tag": "list(dev|pre|release)?"
+      "tag": "list(dev|pre|release)?",
+      "release": "str?"
     },
     "client": "str?",
     "device": "str?",
