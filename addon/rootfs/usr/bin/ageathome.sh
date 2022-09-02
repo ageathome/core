@@ -469,7 +469,7 @@ tag=$(echo "${CONFIG:-null}" | jq -r '.repo.motionai.tag?')
 branch=$(echo "${CONFIG:-null}" | jq -r '.repo.motionai.branch?')
 release=$(echo "${CONFIG:-null}" | jq -r '.repo.motionai.release?')
 
-if [ "${tag:-null}" == 'release' ] && [ "${release:-null}" = 'null' ]; then
+if [ "${tag:-null}" == 'release' ] && [ "${release:-}" = 'none' ] && [ "${release:-null}" = 'null' ]; then
   bashio::log.debug "motionai - no release specified; defaulting to latest"
   release='latest'
 fi

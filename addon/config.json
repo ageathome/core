@@ -1,5 +1,8 @@
 {
-  "version": "0.7.67",
+  "version": "0.7.68",
+  "stage": "experimental",
+  "slug": "ageathome",
+  "startup": "initialize",
   "arch": [
     "aarch64",
     "amd64",
@@ -143,9 +146,6 @@
   "services": [
     "mqtt:want"
   ],
-  "slug": "ageathome",
-  "stage": "stable",
-  "startup": "initialize",
   "timeout": 300,
   "tmpfs": true,
   "url": "https://github.com/ageathome",
