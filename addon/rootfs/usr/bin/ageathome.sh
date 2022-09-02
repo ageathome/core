@@ -29,7 +29,6 @@ function addon::setup.reload()
 
   if [ $(bashio::config 'reload') != 'false' ] && [ -e /config/setup.json ]; then
     local update=0
-    local date='null'
     local i=2
     local old
     local new
@@ -454,24 +453,41 @@ if [ -z "${MOTION_APACHE_HTDOCS:-}" ]; then
   exit 1
 fi
 
+##
+## apache
+##
+
 start_apache_background ${MOTION_APACHE_CONF} ${MOTION_APACHE_HOST} ${MOTION_APACHE_PORT}
 bashio::log.debug "Started Apache on ${MOTION_APACHE_HOST}:${MOTION_APACHE_PORT}"
 
-###
-# download YAML, etc..
-###
-
+##
 ## motionai
+##
 
 tag=$(echo "${CONFIG:-null}" | jq -r '.repo.motionai.tag?')
+branch=$(echo "${CONFIG:-null}" | jq -r '.repo.motionai.branch?')
+release=$(echo "${CONFIG:-null}" | jq -r '.repo.motionai.release?')
+
+if [ "${tag:-null}" == 'release' ] && [ "${release:-null}" = 'null' ]; then
+  bashio::log.debug "motionai - no release specified; defaulting to latest"
+  release='latest'
+fi
+
+if [ "${tag:-null}" == 'dev' ] && [ "${branch:-}" != 'master' ]; then
+  bashio::log.debug "motionai branch ${branch} not supported (yet); defaulting to master"
+  branch='master'
+else 
+  bashio::log.debug "motionai branch: ${branch}"
+fi
+
 if [ "${tag:-dev}" != 'dev' ]; then
-  release=$(echo "${CONFIG:-null}" | jq -r '.repo.motionai.release?')
   bashio::log.debug "motionai - tag ${tag}; release: ${release} not supported (yet); defaulting to dev"
   tag='dev'
 else
   bashio::log.debug "motionai tag: ${tag}"
 fi
 
+# dev: download
 if [ "${tag:-dev}" == 'dev' ]; then
   if [ ! -d /share/motion-ai ]; then
     url=$(echo "${CONFIG:-null}" | jq -r '.repo.motionai.url?')
@@ -483,29 +499,29 @@ if [ "${tag:-dev}" == 'dev' ]; then
   else
     bashio::log.debug "Exists: /share/motion-ai"
   fi
-elif [ "${tag:-dev}" == 'release' ]; then
-  release=$(echo "${CONFIG:-null}" | jq -r '.repo.motionai.release?')
-
-  if [ "${release:-null}" != 'null' ]; then
-    bashio::log.debug "motionai - release: ${release:-null}"
-  else
-    bashio::log.debug "motionai - no release specified; defaulting to latest"
-    release='latest'
-  fi
-else
-  bashio::log.debug "motionai - update tag: ${tag}; release: ${release}: not supported (yet)"
 fi
 
+# release: download
+if [ "${release:-null}" != 'null' ] && [ "${release:-null}" != 'latest' ]; then
+  download=/share/${release##*/}
+
+  if [ ! -s ${download} ]; then
+    curl -ksSL "${release}" -o ${download} 2> /dev/null \
+      && \
+      bashio::log.debug "motionai - downloaded ${release} into ${download}" \
+      || \
+      bashio::log.debug "motionai - failed to download release: ${release:-null}"
+  fi
+  if [ -s "${download}" ] && [ ! -d /share/motion-ai ]; then
+    bashio::log.debug "motionai - TBD: unpack download: ${download}"
+  fi
+else
+  bashio::log.debug "motionai release: ${release} not supported (yet)"
+fi
+
+# dev: update
 if [ "${tag:-dev}" == 'dev' ]; then
   if [ -d /share/motion-ai ]; then
-    branch=$(echo "${CONFIG:-null}" | jq -r '.repo.motionai.branch?')
-  
-    if [ "${branch:-}" != 'master' ]; then
-      bashio::log.debug "motionai branch ${branch} not supported (yet); defaulting to master"
-      branch='master'
-    else 
-      bashio::log.debug "motionai branch: ${branch}"
-    fi
     pushd /share/motion-ai &> /dev/null
     bashio::log.debug "Updating /share/motion-ai"
     git checkout . &> /dev/null
@@ -517,11 +533,15 @@ if [ "${tag:-dev}" == 'dev' ]; then
   fi
 fi
 
+##
 ## ageathome
+##
 
 tag=$(echo "${CONFIG:-null}" | jq -r '.repo.ageathome.tag?')
+branch=$(echo "${CONFIG:-null}" | jq -r '.repo.ageathome.branch?')
+release=$(echo "${CONFIG:-null}" | jq -r '.repo.ageathome.release?')
+
 if [ "${tag:-dev}" != 'dev' ]; then
-  release=$(echo "${CONFIG:-null}" | jq -r '.repo.ageathome.release?')
   bashio::log.debug "ageathome - tag ${tag}; release: ${release} not supported (yet); defaulting to dev"
   tag='dev'
 else
@@ -547,7 +567,6 @@ fi
 
 if [ "${tag:-dev}" == 'dev' ]; then
   if [ -d /share/ageathome ]; then
-    branch=$(echo "${CONFIG:-null}" | jq -r '.repo.ageathome.branch?')
 
     if [ "${branch:-}" != 'master' ]; then
       bashio::log.debug "ageathome branch ${branch} not supported (yet); defaulting to master"
@@ -577,8 +596,12 @@ fi
 if [ ! -e /config/setup.json ]; then
   bashio::log.debug "Initializing /share/ageathome"
   pushd /share/ageathome &> /dev/null
-  MOTION_APP="Age@Home" HOST_NAME="ageathome" HOST_IPADDR="$(echo "${CONFIG:-null}" | jq -r '.network.ip')" \
-    make homeassistant/setup.json &> /dev/null && mv homeassistant/setup.json /config
+  MOTION_APP="Age@Home" \
+    HOST_NAME="ageathome" \
+    HOST_IPADDR="$(echo "${CONFIG:-null}" | jq -r '.network.ip')" \
+    make homeassistant/setup.json &> /dev/null \
+    && \
+    mv homeassistant/setup.json /config
   popd &> /dev/null
   INIT=1
 fi
@@ -590,19 +613,19 @@ addon::setup.reload
 ###
 
 if [ -d /share/ageathome ] && [ -d /share/motion-ai ] && [ -e /config/setup.json ]; then
-  bashio::log.debug "Updating /config from /share/ageathome/homeassistant"
-  pushd /share/ageathome/homeassistant &> /dev/null
+  bashio::log.debug "Updating /config from /share/ageathome/homeassistant at $(date)"
+  pushd /share/ageathome/homeassistant &> /dev/null || bashio::log.warning "pushd failed"
   todo=($(ls -1))
-  rsync -a -L --delete "${todo[@]}" /config/ && bashio::log.info "Synchronization successful" || bashio::log.warning "Synchronization failed"
-  popd &> /dev/null
+  rsync -a -L --delete "${todo[@]}" /config/ && bashio::log.info "Synchronization successful at $(date)" || bashio::log.warning "Synchronization failed at $(date)"
+  popd &> /dev/null || bashio::log.warning "popd failed"
   bashio::log.debug "Making /config at $(date)"
-  pushd /config &> /dev/null
+  pushd /config &> /dev/null || bashio::log.warning "pushd failed"
   MOTION_APP="Age@Home" \
     HOST_NAME="ageathome" \
     HOST_IPADDR="$(echo "${CONFIG:-null}" | jq -r '.network.ip')" \
     PACKAGES="" \
     make &> /dev/null
-  popd &> /dev/null
+  popd &> /dev/null || bashio::log.warning "popd failed"
   bashio::log.notice "Configuration complete at $(date)"
 elif [ ! -e /config/setup.json ]; then
   bashio::log.fatal "Cannot find /config/setup.json"
