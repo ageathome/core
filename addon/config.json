@@ -106,7 +106,7 @@
     "elevation": "int?",
     "group": "str?",
     "latitude": "float?",
-    "log_level": "list(off|debug|info|notice|alert|critical)",
+    "log_level": "list(off|trace|debug|info|notice|alert|critical)",
     "longitude": "float?",
     "mqtt": {
       "host": "str?",

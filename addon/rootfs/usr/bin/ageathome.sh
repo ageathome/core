@@ -424,7 +424,7 @@ source ${USRBIN:-/usr/bin}/motion-tools.sh
 CONFIG=$(addon::config)
 if [ ! -s "$(motion.config.file)" ]; then
   bashio::log.fatal "Cannot find file: $(motion.config.file)"
-  rm -fr /config/setup.json /etc/motion /share/ageathome /share/motionai
+  # rm -fr /config/setup.json /etc/motion /share/ageathome /share/motionai
   exit 1
 elif [ "${CONFIG:-null}" == 'null' ]; then
   bashio::log.fatal "No configuration"
