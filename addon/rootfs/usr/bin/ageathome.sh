@@ -494,7 +494,7 @@ if [ "${tag:-dev}" == 'dev' ]; then
     bashio::log.debug "motionai url: ${url}"
   
     bashio::log.debug "Cloning /share/motion-ai"
-    git clone http://github.com/motion-ai/motion-ai /share/motion-ai &> /dev/null
+    git clone http://github.com/motion-ai/motion-ai /share/motion-ai &> /dev/null || bashio::log.warning "git clone failed"
     INIT=1
   else
     bashio::log.debug "Exists: /share/motion-ai"
@@ -503,18 +503,32 @@ fi
 
 # release: download
 if [ "${release:-null}" != 'null' ] && [ "${release:-null}" != 'latest' ]; then
-  download=/share/${release##*/}
+  download=/share/motionai-${release##*/}
+
+  if [ -s "${download}" ]; then
+    tar tzvf ${download} 2>&1 /dev/null \
+      && \
+      bashio::log.debug "motionai - inspected ${download}; no download required" \
+      || \
+      rm -f "${download}"
+  fi
 
   if [ ! -s ${download} ]; then
     curl -ksSL "${release}" -o ${download} 2> /dev/null \
       && \
       bashio::log.debug "motionai - downloaded ${release} into ${download}" \
-      || \
+      ||
       bashio::log.debug "motionai - failed to download release: ${release:-null}"
   fi
-  if [ -s "${download}" ] && [ ! -d /share/motion-ai ]; then
-    bashio::log.debug "motionai - TBD: unpack download: ${download}"
+
+  if [ -s "${download}" ]; then
+    tar tzvf ${download} 2>&1 /dev/null \
+      && \
+      bashio::log.debug "motionai - successfully inspected: ${download}" \
+      || \
+      bashio::log.debug "motionai - failed to inspect: ${download}"
   fi
+
 else
   bashio::log.debug "motionai release: ${release} not supported (yet)"
 fi
@@ -522,11 +536,11 @@ fi
 # dev: update
 if [ "${tag:-dev}" == 'dev' ]; then
   if [ -d /share/motion-ai ]; then
-    pushd /share/motion-ai &> /dev/null
+    pushd /share/motion-ai &> /dev/null || bashio::log.warning "popd failed"
     bashio::log.debug "Updating /share/motion-ai"
-    git checkout . &> /dev/null
-    git pull &> /dev/null
-    popd &> /dev/null
+    git checkout . &> /dev/null || bashio::log.warning "git checkout failed"
+    git pull &> /dev/null || bashio::log.warning "git pull failed"
+    popd &> /dev/null || bashio::log.warning "popd failed"
   else
     bashio::log.fatal "Cannot find /share/motion-ai"
     exit 1
@@ -554,7 +568,7 @@ if [ "${tag:-dev}" == 'dev' ]; then
     bashio::log.debug "ageathome url: ${url}"
 
     bashio::log.debug "Cloning /share/ageathome"
-    git clone http://github.com/ageathome/core /share/ageathome &> /dev/null
+    git clone http://github.com/ageathome/core /share/ageathome &> /dev/null || bashio::log.warning "git clone failed"
     INIT=1
   else
     bashio::log.debug "Exists: /share/ageathome"
@@ -574,7 +588,7 @@ if [ "${tag:-dev}" == 'dev' ]; then
     else 
       bashio::log.debug "ageathome branch: ${branch}"
     fi
-    pushd /share/ageathome &> /dev/null
+    pushd /share/ageathome &> /dev/null || bashio::log.warning "pushd failed"
     if [ ! -e motion-ai ] && [ -d /share/motion-ai ]; then
       bashio::log.debug "Linking /share/motion-ai"
       ln -s /share/motion-ai .
@@ -582,9 +596,9 @@ if [ "${tag:-dev}" == 'dev' ]; then
       bashio::log.error "Could not link to /share/motion-ai"
     fi
     bashio::log.debug "Updating /share/ageathome"
-    git checkout . &> /dev/null
-    git pull &> /dev/null
-    popd &> /dev/null
+    git checkout . &> /dev/null || bashio::log.warning "git checkout failed"
+    git pull &> /dev/null || bashio::log.warning "git pull failed"
+    popd &> /dev/null || bashio::log.warning "popd failed"
   else
     bashio::log.fatal "Cannot find /share/ageathome"
     exit 1
@@ -595,14 +609,14 @@ fi
 
 if [ ! -e /config/setup.json ]; then
   bashio::log.debug "Initializing /share/ageathome"
-  pushd /share/ageathome &> /dev/null
+  pushd /share/ageathome &> /dev/null || bashio::log.warning "pushd failed"
   MOTION_APP="Age@Home" \
     HOST_NAME="ageathome" \
     HOST_IPADDR="$(echo "${CONFIG:-null}" | jq -r '.network.ip')" \
     make homeassistant/setup.json &> /dev/null \
     && \
     mv homeassistant/setup.json /config
-  popd &> /dev/null
+  popd &> /dev/null || bashio::log.warning "popd failed"
   INIT=1
 fi
 
