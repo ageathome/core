@@ -10,7 +10,7 @@ function addon::setup.update()
   local e="${2:-}"
   local update
 
-  new=$(jq -r '.'"${c}"'?' $(motion.config.file))
+  new=$(jq -r '.'"${c}"'?' "$(motion.config.file)")
   old=$(jq -r '.'"${e}"'?' /config/setup.json)
 
   if [ "${new:-null}" != 'null' ] &&  [ "${old:-}" != "${new:-}" ]; then
@@ -27,7 +27,7 @@ function addon::setup.reload()
 {
   bashio::log.trace "${FUNCNAME[0]} ${*}"
 
-  if [ $(bashio::config 'reload') != 'false' ] && [ -e /config/setup.json ]; then
+  if [ "$(bashio::config 'reload')" != 'false' ] && [ -e /config/setup.json ]; then
     local update=0
     local i=2
     local old
@@ -424,11 +424,10 @@ source ${USRBIN:-/usr/bin}/motion-tools.sh
 CONFIG=$(addon::config)
 if [ ! -s "$(motion.config.file)" ]; then
   bashio::log.fatal "Cannot find file: $(motion.config.file)"
-  rm -fr /share/ageathome /share/motionai /config/setup.json
+  rm -fr /config/setup.json /etc/motion /share/ageathome /share/motionai
   exit 1
 elif [ "${CONFIG:-null}" == 'null' ]; then
   bashio::log.fatal "No configuration"
-  rm -fr /share/ageathome /share/motionai /config/setup.json
   exit 1
 else
   bashio::log.debug "${CONFIG:-}"
