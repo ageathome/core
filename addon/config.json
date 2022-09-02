@@ -1,6 +1,6 @@
 {
-  "version": "0.7.69",
-  "stage": "experimental",
+  "version": "0.7.70",
+  "stage": "stable",
   "slug": "ageathome",
   "startup": "initialize",
   "arch": [
