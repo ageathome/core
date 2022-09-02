@@ -595,7 +595,7 @@ if [ -d /share/ageathome ] && [ -d /share/motion-ai ] && [ -e /config/setup.json
   todo=($(ls -1))
   rsync -a -L --delete "${todo[@]}" /config/ && bashio::log.info "Synchronization successful" || bashio::log.warning "Synchronization failed"
   popd &> /dev/null
-  bashio::log.debug "Making /config"
+  bashio::log.debug "Making /config at $(date)"
   pushd /config &> /dev/null
   MOTION_APP="Age@Home" \
     HOST_NAME="ageathome" \
@@ -603,7 +603,7 @@ if [ -d /share/ageathome ] && [ -d /share/motion-ai ] && [ -e /config/setup.json
     PACKAGES="" \
     make &> /dev/null
   popd &> /dev/null
-  bashio::log.notice "Configuration complete"
+  bashio::log.notice "Configuration complete at $(date)"
 elif [ ! -e /config/setup.json ]; then
   bashio::log.fatal "Cannot find /config/setup.json"
   exit 1
@@ -656,7 +656,7 @@ while true; do
       || bashio::log.debug "Failed to publish configuration to MQTT; config: $(motion.config.mqtt)"
 
     ## sleep
-    bashio::log.debug "Sleeping; ${MOTION_WATCHDOG_INTERVAL:-1800} seconds ..."
+    bashio::log.debug "Sleeping at $(date); ${MOTION_WATCHDOG_INTERVAL:-1800} seconds ..."
     sleep ${MOTION_WATCHDOG_INTERVAL:-1800}
 
 done
