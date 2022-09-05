@@ -324,8 +324,8 @@ function addon::config.timezone()
   local host_tz=$(echo "${host:-null}" | jq -r '.data.timezone')
 
   if [ -z "${host_tz:-}" ] || [ "${host_tz:-null}" == 'null' ]; then
-    bashio::log.debug "${FUNCNAME[0]} ${*} - setting host timezone to default: GMT"
     host_tz='GMT'
+    bashio::log.debug "${FUNCNAME[0]} ${*} - setting host timezone to default: ${host_tz}"
   else
     bashio::log.debug "${FUNCNAME[0]} ${*} - host timezone: ${host_tz}"
   fi
@@ -616,22 +616,33 @@ if [ "${tag:-dev}" == 'dev' ]; then
   fi
 fi
 
-## setup.json
-
+# HOST_NAME
 host=$(curl -sSL -X GET -H "Authorization: Bearer ${SUPERVISOR_TOKEN}" -H "Content-Type: application/json" http://supervisor/host/info)
-host_name=$(echo "${host:-null}" | jq -r '.data.hostname')
-
+host_name=$(echo "${host:-null}" | jq -r '.data.hostname?')
 if [ -z "${host_name:-}" ] || [ "${host_name:-null}" == 'null' ]; then
-    bashio::log.debug "Setting host timezone to default: GMT"
     host_name='homeassistant'
+    bashio::log.debug "Setting host name to default: ${host_name}"
 else
     bashio::log.debug "Found host name: ${host_name}"
 fi
+
+# MOTION_SITE
+config=$(curl -sSL -X GET -H "Authorization: Bearer ${SUPERVISOR_TOKEN}" -H "Content-Type: application/json" http://supervisor/core/api/config)
+motion_site=$(echo "${config:-null}" | jq -r '.location_name?')
+if [ -z "${motion_site:-}" ] || [ "${motion_site:-null}" == 'null' ]; then
+    motion_site='My House'
+    bashio::log.debug "Setting site to default: ${motion_site}"
+else
+    bashio::log.debug "Found site: ${motion_site}"
+fi
+
+## setup.json
 
 if [ ! -e /config/setup.json ]; then
   bashio::log.debug "Initializing /share/ageathome"
   pushd /share/ageathome &> /dev/null || bashio::log.warning "pushd failed"
   MOTION_APP="Age@Home" \
+    MOTION_SITE="${motion_site}" \
     HOST_NAME="${host_name}" \
     HOST_IPADDR="$(echo "${CONFIG:-null}" | jq -r '.network.ip')" \
     make homeassistant/setup.json &> /dev/null \
