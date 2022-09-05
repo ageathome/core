@@ -382,9 +382,9 @@ function addon::config.options()
   local device=$(echo "${host:-null}" | jq -r '.data.hostname?')
   if [ -z "${device:-}" ] || [ "${device:-null}" == 'null' ]; then
     device="$(hostname -s)"
-    bashio::log.debug "Setting device to default: ${device}"
+    bashio::log.debug "${FUNCNAME[0]} ${*} - Setting device to default: ${device}"
   else
-    bashio::log.debug "Found device: ${device}"
+    bashio::log.debug "${FUNCNAME[0]} ${*} - Found device: ${device}"
   fi
   device=$(addon::config.option device "${device}")
 
@@ -675,7 +675,7 @@ if [ -d /share/ageathome ] && [ -d /share/motion-ai ] && [ -e /config/setup.json
   bashio::log.debug "Making /config at $(date)"
   pushd /config &> /dev/null || bashio::log.warning "pushd failed"
   MOTION_APP="Age@Home" \
-    HOST_NAME="ageathome" \
+    HOST_NAME="${host_name}" \
     HOST_IPADDR="$(echo "${CONFIG:-null}" | jq -r '.network.ip')" \
     PACKAGES="" \
     make &> /dev/null
