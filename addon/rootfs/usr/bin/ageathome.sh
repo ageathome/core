@@ -411,7 +411,8 @@ function addon::config.init()
 
   local json='{"supervisor":{"services":'${services:-null}',"host":'${host:-null}',"config":'${config:-null}',"info":'${info:-null}'},"version":"'"${BUILD_VERSION:-}"'","config_path":"'"${CONFIG_PATH}"'","hostname":"'"$(hostname)"'","arch":"'$(arch)'","date":'$(date -u +%s)'}'
 
-  echo "${json}" | jq -Sc '.' > $(motion.config.file)
+  bashio::log.debug "Initializing: $(motion.config.file)"
+  echo "${json}" | jq -Sc '.' | tee $(motion.config.file) || bashio::log.debug "Failed to initialize: $(motion.config.file)"
 }
 
 ## config
@@ -430,7 +431,7 @@ function addon::config()
   local mqtt=$(addon::config.mqtt "${network:-}")
   local options=$(addon::config.options)
 
-  echo '{"timezone":"'${timezone:-}'","location":'${location:-null}',"network":'${network:-null}',"overview":'${overview:-null}',"repo":'${repo:-null}',"roles":'${roles:-null}',"mqtt":'${mqtt:-null}',"options":'${options:-null}'}'
+  echo '{"timezone":"'${timezone:-}'","location":'${location:-null}',"network":'${network:-null}',"overview":'${overview:-null}',"repo":'${repo:-null}',"roles":'${roles:-null}',"mqtt":'${mqtt:-null}',"options":'${options:-null}',"init":'${init:-null}'}'
 }
 
 ###
