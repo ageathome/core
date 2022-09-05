@@ -320,17 +320,17 @@ function addon::config.timezone()
 {
   bashio::log.trace "${FUNCNAME[0]} ${*}"
 
-  local host=$(curl -sSL -X GET -H "Authorization: Bearer ${SUPERVISOR_TOKEN}" -H "Content-Type: application/json" http://supervisor/host/info)
-  local host_tz=$(echo "${host:-null}" | jq -r '.data.timezone')
+  local config=$(curl -sSL -X GET -H "Authorization: Bearer ${SUPERVISOR_TOKEN}" -H "Content-Type: application/json" http://supervisor/core/api/config)
+  local timezone=$(echo "${config:-null}" | jq -r '.time_zone?')
 
-  if [ -z "${host_tz:-}" ] || [ "${host_tz:-null}" == 'null' ]; then
-    host_tz='GMT'
-    bashio::log.debug "${FUNCNAME[0]} ${*} - setting host timezone to default: ${host_tz}"
+  if [ -z "${timezone:-}" ] || [ "${timezone:-null}" == 'null' ]; then
+    timezone='GMT'
+    bashio::log.debug "${FUNCNAME[0]} ${*} - setting timezone to default: ${timezone}"
   else
-    bashio::log.debug "${FUNCNAME[0]} ${*} - host timezone: ${host_tz}"
+    bashio::log.debug "${FUNCNAME[0]} ${*} - timezone: ${timezone}"
   fi
 
-  local timezone=$(addon::config.option timezone "${host_tz:-GMT}")
+  timezone=$(addon::config.option timezone "${timezone}")
 
   if [ -s "/usr/share/zoneinfo/${timezone}" ]; then
     cp /usr/share/zoneinfo/${timezone} /etc/localtime
