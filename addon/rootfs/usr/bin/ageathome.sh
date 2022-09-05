@@ -618,11 +618,21 @@ fi
 
 ## setup.json
 
+host=$(curl -sSL -X GET -H "Authorization: Bearer ${SUPERVISOR_TOKEN}" -H "Content-Type: application/json" http://supervisor/host/info)
+host_name=$(echo "${host:-null}" | jq -r '.data.hostname')
+
+if [ -z "${host_name:-}" ] || [ "${host_name:-null}" == 'null' ]; then
+    bashio::log.debug "${FUNCNAME[0]} ${*} - setting host timezone to default: GMT"
+    host_name='homeassistant'
+else
+    bashio::log.debug "${FUNCNAME[0]} ${*} - host timezone: ${host_name}"
+fi
+
 if [ ! -e /config/setup.json ]; then
   bashio::log.debug "Initializing /share/ageathome"
   pushd /share/ageathome &> /dev/null || bashio::log.warning "pushd failed"
   MOTION_APP="Age@Home" \
-    HOST_NAME="ageathome" \
+    HOST_NAME="${host_name}" \
     HOST_IPADDR="$(echo "${CONFIG:-null}" | jq -r '.network.ip')" \
     make homeassistant/setup.json &> /dev/null \
     && \
