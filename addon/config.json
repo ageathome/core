@@ -1,5 +1,5 @@
 {
-  "version": "0.7.71",
+  "version": "0.7.72",
   "stage": "stable",
   "slug": "ageathome",
   "startup": "initialize",
@@ -30,7 +30,6 @@
   "name": "Age@Home",
   "options": {
     "site": "My House",
-    "timezone": "America/Los_Angeles",
     "motionai": {
       "url": "https://github.com/motion-ai/motion-ai",
       "branch": "master",
