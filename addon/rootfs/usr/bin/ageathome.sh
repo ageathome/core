@@ -367,11 +367,30 @@ function addon::config.options()
 {
   bashio::log.trace "${FUNCNAME[0]} ${*}"
 
-  local device=$(addon::config.option device "$(hostname -s)")
+  local config=$(curl -sSL -X GET -H "Authorization: Bearer ${SUPERVISOR_TOKEN}" -H "Content-Type: application/json" http://supervisor/core/api/config)
+  local site=$(echo "${config:-null}" | jq -r '.location_name?')
+
+  if [ -z "${site:-}" ] || [ "${site:-null}" == 'null' ]; then
+    site='My House'
+    bashio::log.debug "${FUNCNAME[0]} ${*} - Setting site to default: ${site}"
+  else
+    bashio::log.debug "${FUNCNAME[0]} ${*} - Found site: ${site}"
+  fi
+  site=$(addon::config.option site "${site}")
+
+  local host=$(curl -sSL -X GET -H "Authorization: Bearer ${SUPERVISOR_TOKEN}" -H "Content-Type: application/json" http://supervisor/host/info)
+  local device=$(echo "${host:-null}" | jq -r '.data.hostname?')
+  if [ -z "${device:-}" ] || [ "${device:-null}" == 'null' ]; then
+    device="$(hostname -s)"
+    bashio::log.debug "Setting device to default: ${device}"
+  else
+    bashio::log.debug "Found device: ${device}"
+  fi
+  device=$(addon::config.option device "${device}")
+
   local rssurl=$(addon::config.option uptimerobot_rssurl "unknown")
   local iperf=$(addon::config.option iperf_host "127.0.0.1")
   local unit_system=$(addon::config.option unit_system "imperial")
-  local site=$(addon::config.option site "My House")
   local group=$(addon::config.option group "motion")
   local client=$(addon::config.option client "+")
   local share_dir=$(addon::config.option share_dir "/share/${group:-motion}")
@@ -626,23 +645,12 @@ else
     bashio::log.debug "Found host name: ${host_name}"
 fi
 
-# MOTION_SITE
-config=$(curl -sSL -X GET -H "Authorization: Bearer ${SUPERVISOR_TOKEN}" -H "Content-Type: application/json" http://supervisor/core/api/config)
-motion_site=$(echo "${config:-null}" | jq -r '.location_name?')
-if [ -z "${motion_site:-}" ] || [ "${motion_site:-null}" == 'null' ]; then
-    motion_site='My House'
-    bashio::log.debug "Setting site to default: ${motion_site}"
-else
-    bashio::log.debug "Found site: ${motion_site}"
-fi
-
 ## setup.json
 
 if [ ! -e /config/setup.json ]; then
   bashio::log.debug "Initializing /share/ageathome"
   pushd /share/ageathome &> /dev/null || bashio::log.warning "pushd failed"
   MOTION_APP="Age@Home" \
-    MOTION_SITE="${motion_site}" \
     HOST_NAME="${host_name}" \
     HOST_IPADDR="$(echo "${CONFIG:-null}" | jq -r '.network.ip')" \
     make homeassistant/setup.json &> /dev/null \

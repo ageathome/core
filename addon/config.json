@@ -1,5 +1,5 @@
 {
-  "version": "0.7.76",
+  "version": "0.7.78",
   "stage": "stable",
   "slug": "ageathome",
   "startup": "initialize",
@@ -29,7 +29,7 @@
   ],
   "name": "Age@Home",
   "options": {
-    "site": "My House",
+    "site": "",
     "motionai": {
       "url": "https://github.com/motion-ai/motion-ai",
       "branch": "master",
@@ -42,10 +42,10 @@
       "tag": "dev"
     },
     "roles": {
-      "person": "none",
-      "primary": "none",
-      "secondary": "none",
-      "tertiary": "none"
+      "person": "",
+      "primary": "",
+      "secondary": "",
+      "tertiary": ""
     },
     "mqtt": {
       "host": "core-mosquitto",
