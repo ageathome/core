@@ -14,9 +14,9 @@ function addon::setup.update()
   old=$(jq -r '.'"${e}"'?' /config/setup.json)
 
   if [ "${new:-null}" != 'null' ] &&  [ "${old:-}" != "${new:-}" ]; then
-    jq -c '.timestamp="'$(date -u '+%FT%TZ')'"|.'"${e}"'="'"${new}"'"' /config/setup.json > /tmp/setup.json.$$ && mv -f /tmp/setup.json.$$ /config/setup.json && bashio::log.debug "Updated ${e}: ${new}; old: ${old}" && update=1 || bashio::log.debug "Could not update ${e} to ${new}"
+    jq -Sc '.timestamp="'$(date -u '+%FT%TZ')'"|.'"${e}"'="'"${new}"'"' /config/setup.json > /tmp/setup.json.$$ && mv -f /tmp/setup.json.$$ /config/setup.json && bashio::log.debug "Updated ${e}: ${new}; old: ${old}" && update=1 || bashio::log.debug "Could not update ${e} to ${new}"
   elif [ "${new:-null}" == 'null' ] &&  [ "${old:-}" == "null" ]; then
-    jq -c '.timestamp="'$(date -u '+%FT%TZ')'"|.'"${e}"'="'"${new}"'"' /config/setup.json > /tmp/setup.json.$$ && mv -f /tmp/setup.json.$$ /config/setup.json && bashio::log.debug "Initialized ${e}: ${new}" && update=1 || bashio::log.debug "Could not initialize ${e} to ${new}"
+    jq -Sc '.timestamp="'$(date -u '+%FT%TZ')'"|.'"${e}"'="'"${new}"'"' /config/setup.json > /tmp/setup.json.$$ && mv -f /tmp/setup.json.$$ /config/setup.json && bashio::log.debug "Initialized ${e}: ${new}" && update=1 || bashio::log.debug "Could not initialize ${e} to ${new}"
   else
     bashio::log.debug "${FUNCNAME[0]} no change ${e}: ${old}; new: ${new}"
   fi
@@ -182,7 +182,7 @@ function addon::config.option()
   local VALUE=$(bashio::config "${e}") 
 
   if [ -z "${VALUE}" ] || [ "${VALUE}" == "null" ]; then VALUE="${d}"; fi
-  jq -c '.'"${e}"'="'"${VALUE}"'"' $(motion.config.file) > /tmp/$$.json \
+  jq -Sc '.'"${e}"'="'"${VALUE}"'"' $(motion.config.file) > /tmp/$$.json \
     && mv -f /tmp/$$.json $(motion.config.file) \
     || bashio::log.error "Unable to update ${e} in $(motion.config.file)"
 
@@ -353,7 +353,7 @@ function addon::config.network()
                  | egrep -v 'scope global docker' \
                  | awk '{ print $2 }')
 
-  jq -c '.ipaddr="'${ipaddr%%/*}'"' $(motion.config.file) > /tmp/$$.json \
+  jq -Sc '.ipaddr="'${ipaddr%%/*}'"' $(motion.config.file) > /tmp/$$.json \
     && mv -f /tmp/$$.json $(motion.config.file) \
     || bashio::log.error "Unable to update $(motion.config.file)"
 
