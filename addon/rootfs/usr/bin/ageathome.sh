@@ -622,10 +622,10 @@ host=$(curl -sSL -X GET -H "Authorization: Bearer ${SUPERVISOR_TOKEN}" -H "Conte
 host_name=$(echo "${host:-null}" | jq -r '.data.hostname')
 
 if [ -z "${host_name:-}" ] || [ "${host_name:-null}" == 'null' ]; then
-    bashio::log.debug "${FUNCNAME[0]} ${*} - setting host timezone to default: GMT"
+    bashio::log.debug "Setting host timezone to default: GMT"
     host_name='homeassistant'
 else
-    bashio::log.debug "${FUNCNAME[0]} ${*} - host timezone: ${host_name}"
+    bashio::log.debug "Found host name: ${host_name}"
 fi
 
 if [ ! -e /config/setup.json ]; then
