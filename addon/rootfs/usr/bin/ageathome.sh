@@ -320,11 +320,14 @@ function addon::config.timezone()
 {
   bashio::log.trace "${FUNCNAME[0]} ${*}"
 
-  local host_tz=$(jq -r '.config.supervisor.host.data.timezone?' $(motion.config.file))
+  local host=$(curl -sSL -X GET -H "Authorization: Bearer ${SUPERVISOR_TOKEN}" -H "Content-Type: application/json" http://supervisor/host/info)
+  local host_tz=$(echo "${host:-null}" | jq -r '.data.timezone')
 
   if [ -z "${host_tz:-}" ] || [ "${host_tz:-null}" == 'null' ]; then
     bashio::log.debug "${FUNCNAME[0]} ${*} - setting host timezone to default: GMT"
     host_tz='GMT'
+  else
+    bashio::log.debug "${FUNCNAME[0]} ${*} - host timezone: ${host_tz}"
   fi
 
   local timezone=$(addon::config.option timezone "${host_tz:-GMT}")
