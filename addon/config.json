@@ -1,8 +1,4 @@
 {
-  "version": "0.7.83",
-  "stage": "stable",
-  "slug": "ageathome",
-  "startup": "initialize",
   "arch": [
     "aarch64",
     "amd64",
@@ -15,8 +11,8 @@
   "environment": {
     "LOG_FORMAT": "{LEVEL}: {MESSAGE}"
   },
-  "hassio_role": "manager",
   "hassio_api": true,
+  "hassio_role": "manager",
   "homeassistant_api": true,
   "host_network": true,
   "image": "dcmartin/{arch}-addon-ageathome",
@@ -29,23 +25,18 @@
   ],
   "name": "Age@Home",
   "options": {
-    "site": "",
-    "motionai": {
-      "url": "https://github.com/motion-ai/motion-ai",
-      "branch": "master",
-      "tag": "release",
-      "release": "https://github.com/motion-ai/motion-ai/archive/refs/tags/2022.09.02.tar.gz"
-    },
     "ageathome": {
-      "url": "https://github.com/ageathome/core",
       "branch": "master",
-      "tag": "dev"
+      "tag": "dev",
+      "url": "https://github.com/ageathome/core"
     },
-    "roles": {
-      "person": "",
-      "primary": "",
-      "secondary": "",
-      "tertiary": ""
+    "iperf_host": "",
+    "log_level": "notice",
+    "motionai": {
+      "branch": "master",
+      "release": "https://github.com/motion-ai/motion-ai/archive/refs/tags/2022.09.02.tar.gz",
+      "tag": "release",
+      "url": "https://github.com/motion-ai/motion-ai"
     },
     "mqtt": {
       "host": "core-mosquitto",
@@ -59,17 +50,22 @@
       "mode": "local",
       "zoom": 18
     },
-    "iperf_host": "",
-    "uptimerobot_rssurl": "",
-    "wifi": {
-      "ssid": "",
-      "password": ""
+    "roles": {
+      "person": "",
+      "primary": "",
+      "secondary": "",
+      "tertiary": ""
     },
+    "site": "",
+    "uptimerobot_rssurl": "",
     "w3w": {
       "apikey": "",
       "words": "///what.three.words"
     },
-    "log_level": "notice"
+    "wifi": {
+      "password": "",
+      "ssid": ""
+    }
   },
   "panel_admin": true,
   "panel_icon": "mdi:home-heart",
@@ -90,26 +86,26 @@
     "runc": true
   },
   "schema": {
-    "site": "str?",
-    "motionai": {
-      "url": "str?",
-      "branch": "list(test|alpha|beta|master)?",
-      "tag": "list(dev|pre|release)?",
-      "release": "str?"
-    },
     "ageathome": {
-      "url": "str?",
       "branch": "list(test|alpha|beta|master)?",
+      "release": "str?",
       "tag": "list(dev|pre|release)?",
-      "release": "str?"
+      "url": "str?"
     },
     "client": "str?",
     "device": "str?",
     "elevation": "int?",
     "group": "str?",
+    "iperf_host": "str?",
     "latitude": "float?",
     "log_level": "list(off|trace|debug|info|notice|alert|critical)",
     "longitude": "float?",
+    "motionai": {
+      "branch": "list(test|alpha|beta|master)?",
+      "release": "str?",
+      "tag": "list(dev|pre|release)?",
+      "url": "str?"
+    },
     "mqtt": {
       "host": "str?",
       "password": "str?",
@@ -122,32 +118,36 @@
       "mode": "list(local|hybrid|roadmap|satellite|terrain)?",
       "zoom": "int(10,22)?"
     },
+    "reload": "bool?",
     "roles": {
       "person": "str?",
       "primary": "str?",
       "secondary": "str?",
       "tertiary": "str?"
     },
-    "reload": "bool?",
+    "site": "str?",
     "timezone": "str?",
-    "iperf_host": "str?",
-    "uptimerobot_rssurl": "str?",
     "unit_system": "list(imperial|metric)?",
-    "wifi": {
-      "ssid": "str?",
-      "password": "str?"
-    },
+    "uptimerobot_rssurl": "str?",
     "w3w": {
       "apikey": "str?",
       "words": "str?"
+    },
+    "wifi": {
+      "password": "str?",
+      "ssid": "str?"
     }
   },
   "services": [
     "mqtt:want"
   ],
+  "slug": "ageathome",
+  "stage": "stable",
+  "startup": "initialize",
   "timeout": 300,
   "tmpfs": true,
   "url": "https://github.com/ageathome",
+  "version": "0.7.84",
   "video": false,
   "webui": "http://[HOST]:[PORT:7999]/"
 }
