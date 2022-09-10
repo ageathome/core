@@ -736,5 +736,7 @@ while true; do
     ## sleep
     bashio::log.debug "Sleeping at $(date); ${MOTION_WATCHDOG_INTERVAL:-1800} seconds ..."
     sleep ${MOTION_WATCHDOG_INTERVAL:-1800}
+    bashio::log.debug "Updating addons"
+    curl -sSL -X GET -H "Authorization: Bearer ${SUPERVISOR_TOKEN}" -H "Content-Type: application/json" http://supervisor/addons/reload &> /dev/null
 
 done
