@@ -14,11 +14,12 @@ function addon::setup.update()
   old=$(jq -r '.'"${e}"'?' /config/setup.json)
 
   if [ "${new:-null}" != 'null' ] &&  [ "${old:-}" != "${new:-}" ]; then
-    jq -Sc '.timestamp="'$(date -u '+%FT%TZ')'"|.'"${e}"'="'"${new:-none}"'"' /config/setup.json > /tmp/setup.json.$$ && mv -f /tmp/setup.json.$$ /config/setup.json && bashio::log.debug "Updated ${e}: ${new:-none}; old: ${old}" && update=1 || bashio::log.debug "Could not update ${e} to ${new:-none}"
-  elif [ "${new:-null}" == 'null' ] &&  [ "${old:-}" == "null" ]; then
-    jq -Sc '.timestamp="'$(date -u '+%FT%TZ')'"|.'"${e}"'="'"${new:-none}"'"' /config/setup.json > /tmp/setup.json.$$ && mv -f /tmp/setup.json.$$ /config/setup.json && bashio::log.debug "Initialized ${e}: ${new:-none}" && update=1 || bashio::log.debug "Could not initialize ${e} to ${new:-none}"
+    jq -Sc '.timestamp="'$(date -u '+%FT%TZ')'"|.'"${e}"'="'"${new}"'"' /config/setup.json > /tmp/setup.json.$$ && mv -f /tmp/setup.json.$$ /config/setup.json && bashio::log.debug "Updated ${e}: ${new}; old: ${old}" && update=1 || bashio::log.debug "Could not update ${e} to ${new}"
+  elif [ "${new:-null}" == 'null' ]; then
+    new='none'
+    jq -Sc '.timestamp="'$(date -u '+%FT%TZ')'"|.'"${e}"'="'"${new}"'"' /config/setup.json > /tmp/setup.json.$$ && mv -f /tmp/setup.json.$$ /config/setup.json && bashio::log.debug "Initialized ${e}: ${new}" && update=1 || bashio::log.debug "Could not initialize ${e} to ${new}"
   else
-    bashio::log.debug "${FUNCNAME[0]} no change ${e}: ${old}; new: ${new:-none}"
+    bashio::log.debug "${FUNCNAME[0]} no change ${e}: ${old}; new: ${new}"
   fi
   echo ${update:-0}
 }
