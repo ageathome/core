@@ -14,11 +14,11 @@ function addon::setup.update()
   old=$(jq -r '.'"${e}"'?' /config/setup.json)
 
   if [ "${new:-null}" != 'null' ] &&  [ "${old:-}" != "${new:-}" ]; then
-    jq -Sc '.timestamp="'$(date -u '+%FT%TZ')'"|.'"${e}"'="'"${new}"'"' /config/setup.json > /tmp/setup.json.$$ && mv -f /tmp/setup.json.$$ /config/setup.json && bashio::log.debug "Updated ${e}: ${new}; old: ${old}" && update=1 || bashio::log.debug "Could not update ${e} to ${new}"
+    jq -Sc '.timestamp="'$(date -u '+%FT%TZ')'"|.'"${e}"'="'"${new:-none}"'"' /config/setup.json > /tmp/setup.json.$$ && mv -f /tmp/setup.json.$$ /config/setup.json && bashio::log.debug "Updated ${e}: ${new:-none}; old: ${old}" && update=1 || bashio::log.debug "Could not update ${e} to ${new:-none}"
   elif [ "${new:-null}" == 'null' ] &&  [ "${old:-}" == "null" ]; then
-    jq -Sc '.timestamp="'$(date -u '+%FT%TZ')'"|.'"${e}"'="'"${new}"'"' /config/setup.json > /tmp/setup.json.$$ && mv -f /tmp/setup.json.$$ /config/setup.json && bashio::log.debug "Initialized ${e}: ${new}" && update=1 || bashio::log.debug "Could not initialize ${e} to ${new}"
+    jq -Sc '.timestamp="'$(date -u '+%FT%TZ')'"|.'"${e}"'="'"${new:-none}"'"' /config/setup.json > /tmp/setup.json.$$ && mv -f /tmp/setup.json.$$ /config/setup.json && bashio::log.debug "Initialized ${e}: ${new:-none}" && update=1 || bashio::log.debug "Could not initialize ${e} to ${new:-none}"
   else
-    bashio::log.debug "${FUNCNAME[0]} no change ${e}: ${old}; new: ${new}"
+    bashio::log.debug "${FUNCNAME[0]} no change ${e}: ${old}; new: ${new:-none}"
   fi
   echo ${update:-0}
 }
@@ -79,6 +79,11 @@ function addon::setup.reload()
           tf=$(addon::setup.update 'roles.primary' 'MOTION_PRIMARY') && update=$((update+tf))
           tf=$(addon::setup.update 'roles.secondary' 'MOTION_SECONDARY') && update=$((update+tf))
           tf=$(addon::setup.update 'roles.tertiary' 'MOTION_TERTIARY') && update=$((update+tf))
+          # DEVICES
+          tf=$(addon::setup.update 'devices.person' 'MOTION_USER_DEVICE') && update=$((update+tf))
+          tf=$(addon::setup.update 'devices.primary' 'MOTION_PRIMARY_DEVICE') && update=$((update+tf))
+          tf=$(addon::setup.update 'devices.secondary' 'MOTION_SECONDARY_DEVICE') && update=$((update+tf))
+          tf=$(addon::setup.update 'devices.tertiary' 'MOTION_TERTIARY_DEVICE') && update=$((update+tf))
         fi
 
         # test if update

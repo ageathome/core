@@ -56,6 +56,12 @@
       "secondary": "",
       "tertiary": ""
     },
+    "devices": {
+      "person": "",
+      "primary": "",
+      "secondary": "",
+      "tertiary": ""
+    },
     "site": "",
     "uptimerobot_rssurl": "",
     "w3w": {
@@ -125,6 +131,12 @@
       "secondary": "str?",
       "tertiary": "str?"
     },
+    "devices": {
+      "person": "str?",
+      "primary": "str?",
+      "secondary": "str?",
+      "tertiary": "str?"
+    },
     "site": "str?",
     "timezone": "str?",
     "unit_system": "list(imperial|metric)?",
@@ -147,7 +159,7 @@
   "timeout": 300,
   "tmpfs": true,
   "url": "https://github.com/ageathome",
-  "version": "0.7.95",
+  "version": "0.7.96",
   "video": false,
   "webui": "http://[HOST]:[PORT:7999]/"
 }
