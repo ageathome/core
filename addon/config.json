@@ -62,7 +62,6 @@
       "secondary": "none",
       "tertiary": "none"
     },
-    "site": "none",
     "uptimerobot_rssurl": "none",
     "w3w": {
       "apikey": "none",
@@ -159,7 +158,7 @@
   "timeout": 300,
   "tmpfs": true,
   "url": "https://github.com/ageathome",
-  "version": "0.7.97",
+  "version": "0.7.98",
   "video": false,
   "webui": "http://[HOST]:[PORT:7999]/"
 }
