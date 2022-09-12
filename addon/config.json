@@ -30,7 +30,7 @@
       "tag": "dev",
       "url": "https://github.com/ageathome/core"
     },
-    "iperf_host": "none"
+    "iperf_host": "none",
     "log_level": "notice",
     "motionai": {
       "branch": "master",
@@ -45,31 +45,31 @@
       "username": "username"
     },
     "overview": {
-      "apikey": "none"
+      "apikey": "none",
       "image": "overview.jpg",
       "mode": "local",
       "zoom": 18
     },
     "roles": {
-      "person": "none"
-      "primary": "none"
-      "secondary": "none"
+      "person": "none",
+      "primary": "none",
+      "secondary": "none",
       "tertiary": "none"
     },
     "devices": {
-      "person": "none"
-      "primary": "none"
-      "secondary": "none"
+      "person": "none",
+      "primary": "none",
+      "secondary": "none",
       "tertiary": "none"
     },
     "site": "none",
-    "uptimerobot_rssurl": "none"
+    "uptimerobot_rssurl": "none",
     "w3w": {
-      "apikey": "none"
+      "apikey": "none",
       "words": "///what.three.words"
     },
     "wifi": {
-      "password": "none"
+      "password": "none",
       "ssid": "none"
     }
   },
