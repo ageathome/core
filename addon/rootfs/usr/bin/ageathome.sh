@@ -217,10 +217,24 @@ function addon::config.roles()
 {
   bashio::log.trace "${FUNCNAME[0]} ${*}"
 
-  local person=$(addon::config.option roles.person "")
-  local primary=$(addon::config.option roles.primary "")
-  local secondary=$(addon::config.option roles.secondary "")
-  local tertiary=$(addon::config.option roles.tertiary "")
+  local person=$(addon::config.option roles.person "none")
+  local primary=$(addon::config.option roles.primary "none")
+  local secondary=$(addon::config.option roles.secondary "none")
+  local tertiary=$(addon::config.option roles.tertiary "none")
+
+  echo '{"person":"'${person:-}'","primary":"'${primary:-}'","secondary":"'${secondary:-}'","tertiary":"'${tertiary:-}'"}'
+}
+
+## devices
+
+function addon::config.devices()
+{
+  bashio::log.trace "${FUNCNAME[0]} ${*}"
+
+  local person=$(addon::config.option devices.person "none")
+  local primary=$(addon::config.option devices.primary "none")
+  local secondary=$(addon::config.option devices.secondary "none")
+  local tertiary=$(addon::config.option devices.tertiary "none")
 
   echo '{"person":"'${person:-}'","primary":"'${primary:-}'","secondary":"'${secondary:-}'","tertiary":"'${tertiary:-}'"}'
 }
@@ -432,6 +446,7 @@ function addon::config()
   local init=$(addon::config.init)
   local timezone=$(addon::config.timezone)
   local roles=$(addon::config.roles)
+  local devices=$(addon::config.devices)
   local repo=$(addon::config.repo)
   local overview=$(addon::config.overview)
   local location=$(addon::config.location)
@@ -439,7 +454,7 @@ function addon::config()
   local mqtt=$(addon::config.mqtt "${network:-}")
   local options=$(addon::config.options)
 
-  echo '{"timezone":"'${timezone:-}'","location":'${location:-null}',"network":'${network:-null}',"overview":'${overview:-null}',"repo":'${repo:-null}',"roles":'${roles:-null}',"mqtt":'${mqtt:-null}',"options":'${options:-null}',"init":'${init:-null}'}'
+  echo '{"timezone":"'${timezone:-}'","location":'${location:-null}',"network":'${network:-null}',"overview":'${overview:-null}',"repo":'${repo:-null}',"roles":'${roles:-null}',"devices":'${devices:-null}',"mqtt":'${mqtt:-null}',"options":'${options:-null}',"init":'${init:-null}'}'
 }
 
 ###
