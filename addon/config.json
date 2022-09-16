@@ -30,6 +30,12 @@
       "tag": "dev",
       "url": "https://github.com/ageathome/core"
     },
+    "devices": {
+      "person": "none",
+      "primary": "none",
+      "secondary": "none",
+      "tertiary": "none"
+    },
     "iperf_host": "none",
     "log_level": "notice",
     "motionai": {
@@ -51,12 +57,6 @@
       "zoom": 18
     },
     "roles": {
-      "person": "none",
-      "primary": "none",
-      "secondary": "none",
-      "tertiary": "none"
-    },
-    "devices": {
       "person": "none",
       "primary": "none",
       "secondary": "none",
@@ -99,6 +99,12 @@
     },
     "client": "str?",
     "device": "str?",
+    "devices": {
+      "person": "str?",
+      "primary": "str?",
+      "secondary": "str?",
+      "tertiary": "str?"
+    },
     "elevation": "int?",
     "group": "str?",
     "iperf_host": "str?",
@@ -125,12 +131,6 @@
     },
     "reload": "bool?",
     "roles": {
-      "person": "str?",
-      "primary": "str?",
-      "secondary": "str?",
-      "tertiary": "str?"
-    },
-    "devices": {
       "person": "str?",
       "primary": "str?",
       "secondary": "str?",
