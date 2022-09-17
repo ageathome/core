@@ -15,11 +15,6 @@ function addon::setup.update()
 
   if [ "${new:-null}" != 'null' ] &&  [ "${old:-}" != "${new:-}" ]; then
     jq -Sc '.timestamp="'$(date -u '+%FT%TZ')'"|.'"${e}"'="'"${new}"'"' /config/setup.json > /tmp/setup.json.$$ && mv -f /tmp/setup.json.$$ /config/setup.json && bashio::log.debug "Updated ${e}: ${new}; old: ${old}" && update=1 || bashio::log.debug "Could not update ${e} to ${new}"
-  elif [ "${new:-null}" != 'null' ]; then
-    jq -Sc '.timestamp="'$(date -u '+%FT%TZ')'"|.'"${e}"'="'"${new}"'"' /config/setup.json > /tmp/setup.json.$$ && mv -f /tmp/setup.json.$$ /config/setup.json && bashio::log.debug "Setting ${e}: ${new}" && update=1 || bashio::log.debug "Could not initialize ${e} to ${new}"
-  elif [ "${new:-null}" == 'null' ]; then
-    new='none'
-    jq -Sc '.timestamp="'$(date -u '+%FT%TZ')'"|.'"${e}"'="'"${new}"'"' /config/setup.json > /tmp/setup.json.$$ && mv -f /tmp/setup.json.$$ /config/setup.json && bashio::log.debug "Defaulting ${e}: ${new}" && update=1 || bashio::log.debug "Could not initialize ${e} to ${new}"
   else
     bashio::log.debug "${FUNCNAME[0]} no change ${e}: ${old}; new: ${new}"
   fi
@@ -477,7 +472,6 @@ source ${USRBIN:-/usr/bin}/motion-tools.sh
 CONFIG=$(addon::config)
 if [ ! -s "$(motion.config.file)" ]; then
   bashio::log.fatal "Cannot find file: $(motion.config.file)"
-  # rm -fr /config/setup.json /etc/motion /share/ageathome /share/motionai
   exit 1
 elif [ "${CONFIG:-null}" == 'null' ]; then
   bashio::log.fatal "No configuration"
@@ -759,7 +753,20 @@ while true; do
     ## sleep
     bashio::log.debug "Sleeping at $(date); ${MOTION_WATCHDOG_INTERVAL:-1800} seconds ..."
     sleep ${MOTION_WATCHDOG_INTERVAL:-1800}
-    bashio::log.debug "Updating addons"
+    bashio::log.debug "Refreshing add-on repository(s)"
     curl -sSL -X GET -H "Authorization: Bearer ${SUPERVISOR_TOKEN}" -H "Content-Type: application/json" http://supervisor/addons/reload &> /dev/null
+
+    config=$(curl -ksSL -X POST -H "Authorization: Bearer ${SUPERVISOR_TOKEN}" -H "Content-Type: application/json" 'http://supervisor/core/api/config/core/check_config')
+    if [ "${config:-null}" != 'null' ]; then
+      # {"result":"valid","errors":null}
+      result=$(echo "${config}" | jq '.result?')
+      if [ "${result:-null}" != 'valid' ]; then
+        bashio::log.debug "Invalid configuration"
+      else 
+        bashio::log.debug "Valid configuration"
+      fi
+    else 
+      bashio::log.debug "No configuration"
+    fi
 
 done
