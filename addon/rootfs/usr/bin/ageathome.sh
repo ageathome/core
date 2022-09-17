@@ -747,16 +747,16 @@ while true; do
 
     ## validate configuration
     valid=$(curl -sSL -X POST -H "Authorization: Bearer ${SUPERVISOR_TOKEN}" -H "Content-Type: application/json" "http://supervisor/core/api/config/core/check_config")
-    bashio::log.info "Configuration validation results: ${valid}" 
+    bashio::log.debug "Configuration validation results: ${valid}" 
     echo '{"date":'$(date -u +%s)',"valid":'"${valid:-null}"'}' > /etc/motion/valid.json
 
     ## publish configuration
     ( motion.mqtt.pub -r -q 2 -t "$(motion.config.group)/$(motion.config.device)/start" -f "$(motion.config.file)" &> /dev/null \
-      && bashio::log.info "Published configuration to MQTT; topic: $(motion.config.group)/$(motion.config.device)/start" ) \
-      || bashio::log.info "Failed to publish configuration to MQTT; config: $(motion.config.mqtt)"
+      && bashio::log.debug "Published configuration to MQTT; topic: $(motion.config.group)/$(motion.config.device)/start" ) \
+      || bashio::log.debug "Failed to publish configuration to MQTT; config: $(motion.config.mqtt)"
 
     ## sleep
-    bashio::log.info "Sleeping at $(date); ${MOTION_WATCHDOG_INTERVAL:-1800} seconds ..."
+    bashio::log.debug "Sleeping at $(date); ${MOTION_WATCHDOG_INTERVAL:-1800} seconds ..."
     sleep ${MOTION_WATCHDOG_INTERVAL:-1800}
 
 done
