@@ -753,19 +753,5 @@ while true; do
     ## sleep
     bashio::log.debug "Sleeping at $(date); ${MOTION_WATCHDOG_INTERVAL:-1800} seconds ..."
     sleep ${MOTION_WATCHDOG_INTERVAL:-1800}
-    bashio::log.debug "Refreshing add-on repository(s)"
-    curl -ksSL -X GET -H "Authorization: Bearer ${SUPERVISOR_TOKEN}" -H "Content-Type: application/json" http://supervisor/addons/reload &> /dev/null
-
-    config=$(curl -ksSL -X POST -H "Authorization: Bearer ${SUPERVISOR_TOKEN}" -H "Content-Type: application/json" 'http://supervisor/core/api/config/core/check_config')
-    if [ "${config:-null}" != 'null' ]; then
-      result=$(echo "${config}" | jq -r '.result?')
-      if [ "${result:-null}" != 'valid' ]; then
-        bashio::log.debug "Invalid configuration: ${config}"
-      else
-        bashio::log.debug "Valid configuration: ${config}"
-      fi
-    else
-      bashio::log.debug "No configuration"
-    fi
 
 done

@@ -2,7 +2,7 @@
 
 find_status()
 {
-  result="$(${0%/*}/motion.status.sh)"
+  result="$(${0%/*}/ageathome.status.sh)"
 
   if [ "${result:-null}" != 'null' ]; then
     echo '{"timestamp":"'$(date -u +%FT%TZ)'","status":'"${result:-null}"'}'
