@@ -46,7 +46,7 @@ function addon::setup.reload()
           # w3w
           tf=$(addon::setup.update 'w3w.apikey' 'MOTION_W3W_APIKEY') && update=$((update+tf))
           tf=$(addon::setup.update 'w3w.words' 'MOTION_W3W_WORDS') && update=$((update+tf))
-          # uptimerobot 
+          # uptimerobot
           tf=$(addon::setup.update 'uptimerobot_rssurl' 'UPTIMEROBOT_RSSURL') && update=$((update+tf))
           # iperf
           tf=$(addon::setup.update 'iperf_host' 'IPERF_HOST') && update=$((update+tf))
@@ -104,7 +104,7 @@ function addon::setup.reload()
     done
   elif [ ! -e /config/setup.json ]; then
     bashio::log.debug "Did not find /config/setup.json"
-  else 
+  else
     bashio::log.debug "Reload off"
   fi
 }
@@ -182,7 +182,7 @@ function addon::config.option()
 
   local e="${1:-}"
   local d="${2:-}"
-  local VALUE=$(bashio::config "${e}") 
+  local VALUE=$(bashio::config "${e}")
 
   if [ -z "${VALUE}" ] || [ "${VALUE}" == "null" ]; then VALUE="${d}"; fi
   jq -Sc '.'"${e}"'="'"${VALUE}"'"' $(motion.config.file) > /tmp/$$.json \
@@ -314,9 +314,9 @@ function addon::config.mqtt()
     bashio::log.debug "${FUNCNAME[0]}: MQTT service unavailable through supervisor; using configuration."
   fi
 
-  if [ -z "${host:-}" ]; then 
-    host=$(bashio::config "mqtt.host") 
-    if [ "${host:-null}" = 'null' ]; then 
+  if [ -z "${host:-}" ]; then
+    host=$(bashio::config "mqtt.host")
+    if [ "${host:-null}" = 'null' ]; then
       host="${ip:-127.0.0.1}"
       bashio::log.debug "${FUNCNAME[0]}: MQTT host configuration undefined; using host IP address: ${host:-}"
     fi
@@ -524,7 +524,7 @@ fi
 if [ "${tag:-null}" == 'dev' ] && [ "${branch:-}" != 'master' ]; then
   bashio::log.debug "motionai branch ${branch} not supported (yet); defaulting to master"
   branch='master'
-else 
+else
   bashio::log.debug "motionai branch: ${branch}"
 fi
 
@@ -540,7 +540,7 @@ if [ "${tag:-dev}" == 'dev' ]; then
   if [ ! -d /share/motion-ai ]; then
     url=$(echo "${CONFIG:-null}" | jq -r '.repo.motionai.url?')
     bashio::log.debug "motionai url: ${url}"
-  
+
     bashio::log.debug "Cloning /share/motion-ai"
     git clone http://github.com/motion-ai/motion-ai /share/motion-ai &> /dev/null || bashio::log.warning "git clone failed"
     INIT=1
@@ -633,7 +633,7 @@ if [ "${tag:-dev}" == 'dev' ]; then
     if [ "${branch:-}" != 'master' ]; then
       bashio::log.debug "ageathome branch ${branch} not supported (yet); defaulting to master"
       branch='master'
-    else 
+    else
       bashio::log.debug "ageathome branch: ${branch}"
     fi
     pushd /share/ageathome &> /dev/null || bashio::log.warning "pushd failed"
@@ -762,10 +762,10 @@ while true; do
       result=$(echo "${config}" | jq '.result?')
       if [ "${result:-null}" != 'valid' ]; then
         bashio::log.debug "Invalid configuration"
-      else 
+      else
         bashio::log.debug "Valid configuration"
       fi
-    else 
+    else
       bashio::log.debug "No configuration"
     fi
 
