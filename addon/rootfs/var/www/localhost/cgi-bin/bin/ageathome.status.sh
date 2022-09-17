@@ -26,9 +26,12 @@ motion.restart()
 
 ageathome.status()
 {
-  local config=$(curl -sSL -X POST -H "Authorization: Bearer ${SUPERVISOR_TOKEN}" -H "Content-Type: application/json" 'http://supervisor/core/api/config/core/check_config')
+  local status
 
-  echo "${config:-null}"
+  if [ -s "/tmp/valid.json" ]; then
+    status=$(jq -Sc . "/tmp/valid.json")
+  fi
+  echo "${status:-null}"
 }
 
 motion.status()
