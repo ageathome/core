@@ -747,7 +747,7 @@ while true; do
 
     ## validate configuration
     bashio::log.debug "Validating configuration ..."
-    curl -sSL -X POST -H "Authorization: Bearer ${SUPERVISOR_TOKEN}" -H "Content-Type: application/json" "http://supervisor/core/api/config/core/check_config" -o /tmp/valid.json &> /dev/null
+    curl -sSL -X POST -H "Authorization: Bearer ${SUPERVISOR_TOKEN}" -H "Content-Type: application/json" "http://supervisor/core/api/config/core/check_config" -o /etc/motion/valid.json &> /dev/null
 
     ## publish configuration
     ( motion.mqtt.pub -r -q 2 -t "$(motion.config.group)/$(motion.config.device)/start" -f "$(motion.config.file)" &> /dev/null \

@@ -28,8 +28,8 @@ ageathome.status()
 {
   local status
 
-  if [ -s "/tmp/valid.json" ]; then
-    status=$(jq -Sc . "/tmp/valid.json")
+  if [ -s "/etc/motion/valid.json" ]; then
+    status=$(jq -Sc . "/etc/motion/valid.json")
   fi
   echo "${status:-null}"
 }
