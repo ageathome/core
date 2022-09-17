@@ -158,7 +158,7 @@
   "timeout": 300,
   "tmpfs": true,
   "url": "https://github.com/ageathome",
-  "version": "0.7.102",
+  "version": "0.7.103",
   "video": false,
   "webui": "http://[HOST]:[PORT:7999]/"
 }
