@@ -748,7 +748,7 @@ while true; do
     ## validate configuration
     valid=$(curl -sSL -X POST -H "Authorization: Bearer ${SUPERVISOR_TOKEN}" -H "Content-Type: application/json" "http://supervisor/core/api/config/core/check_config")
     bashio::log.debug "Configuration validation results: ${valid}" 
-    echo '{"date":'$(date -u +%s)',"valid":'"${valid:-null}"'}' > /etc/motion/valid.json
+    echo '{"host":"'$(echo "${CONFIG:-null}" | jq -r '.network.ip')'","date":'$(date -u +%s)',"valid":'"${valid:-null}"'}' > /etc/motion/valid.json
 
     ## publish configuration
     ( motion.mqtt.pub -r -q 2 -t "$(motion.config.group)/$(motion.config.device)/start" -f "$(motion.config.file)" &> /dev/null \
