@@ -10,13 +10,11 @@ function addon::setup.update()
   local e="${2:-}"
   local update
 
-  new=$(jq -r '.'"${c}"'?' $(motion.config.file))
+  new=$(jq -r '.'"${c}"'?' "$(motion.config.file)")
   old=$(jq -r '.'"${e}"'?' /config/setup.json)
 
   if [ "${new:-null}" != 'null' ] &&  [ "${old:-}" != "${new:-}" ]; then
-    jq -c '.timestamp="'$(date -u '+%FT%TZ')'"|.'"${e}"'="'"${new}"'"' /config/setup.json > /tmp/setup.json.$$ && mv -f /tmp/setup.json.$$ /config/setup.json && bashio::log.debug "Updated ${e}: ${new}; old: ${old}" && update=1 || bashio::log.debug "Could not update ${e} to ${new}"
-  elif [ "${new:-null}" == 'null' ] &&  [ "${old:-}" == "null" ]; then
-    jq -c '.timestamp="'$(date -u '+%FT%TZ')'"|.'"${e}"'="'"${new}"'"' /config/setup.json > /tmp/setup.json.$$ && mv -f /tmp/setup.json.$$ /config/setup.json && bashio::log.debug "Initialized ${e}: ${new}" && update=1 || bashio::log.debug "Could not initialize ${e} to ${new}"
+    jq -Sc '.timestamp="'$(date -u '+%FT%TZ')'"|.'"${e}"'="'"${new}"'"' /config/setup.json > /tmp/setup.json.$$ && mv -f /tmp/setup.json.$$ /config/setup.json && bashio::log.debug "Updated ${e}: ${new}; old: ${old}" && update=1 || bashio::log.debug "Could not update ${e} to ${new}"
   else
     bashio::log.debug "${FUNCNAME[0]} no change ${e}: ${old}; new: ${new}"
   fi
@@ -27,9 +25,8 @@ function addon::setup.reload()
 {
   bashio::log.trace "${FUNCNAME[0]} ${*}"
 
-  if [ $(bashio::config 'reload') != 'false' ] && [ -e /config/setup.json ]; then
+  if [ "$(bashio::config 'reload')" != 'false' ] && [ -e /config/setup.json ]; then
     local update=0
-    local date='null'
     local i=2
     local old
     local new
@@ -44,12 +41,12 @@ function addon::setup.reload()
 
         # check configuration (timezone, latitude, longitude, mqtt, group, device, client)
         if [ -e /config/setup.json ]; then
-          # w3w
+          # site
           tf=$(addon::setup.update 'site' 'MOTION_SITE') && update=$((update+tf))
           # w3w
           tf=$(addon::setup.update 'w3w.apikey' 'MOTION_W3W_APIKEY') && update=$((update+tf))
           tf=$(addon::setup.update 'w3w.words' 'MOTION_W3W_WORDS') && update=$((update+tf))
-          # uptimerobot 
+          # uptimerobot
           tf=$(addon::setup.update 'uptimerobot_rssurl' 'UPTIMEROBOT_RSSURL') && update=$((update+tf))
           # iperf
           tf=$(addon::setup.update 'iperf_host' 'IPERF_HOST') && update=$((update+tf))
@@ -80,6 +77,11 @@ function addon::setup.reload()
           tf=$(addon::setup.update 'roles.primary' 'MOTION_PRIMARY') && update=$((update+tf))
           tf=$(addon::setup.update 'roles.secondary' 'MOTION_SECONDARY') && update=$((update+tf))
           tf=$(addon::setup.update 'roles.tertiary' 'MOTION_TERTIARY') && update=$((update+tf))
+          # DEVICES
+          tf=$(addon::setup.update 'devices.person' 'MOTION_USER_DEVICE') && update=$((update+tf))
+          tf=$(addon::setup.update 'devices.primary' 'MOTION_PRIMARY_DEVICE') && update=$((update+tf))
+          tf=$(addon::setup.update 'devices.secondary' 'MOTION_SECONDARY_DEVICE') && update=$((update+tf))
+          tf=$(addon::setup.update 'devices.tertiary' 'MOTION_TERTIARY_DEVICE') && update=$((update+tf))
         fi
 
         # test if update
@@ -102,7 +104,7 @@ function addon::setup.reload()
     done
   elif [ ! -e /config/setup.json ]; then
     bashio::log.debug "Did not find /config/setup.json"
-  else 
+  else
     bashio::log.debug "Reload off"
   fi
 }
@@ -180,10 +182,10 @@ function addon::config.option()
 
   local e="${1:-}"
   local d="${2:-}"
-  local VALUE=$(bashio::config "${e}") 
+  local VALUE=$(bashio::config "${e}")
 
   if [ -z "${VALUE}" ] || [ "${VALUE}" == "null" ]; then VALUE="${d}"; fi
-  jq -c '.'"${e}"'="'"${VALUE}"'"' $(motion.config.file) > /tmp/$$.json \
+  jq -Sc '.'"${e}"'="'"${VALUE}"'"' $(motion.config.file) > /tmp/$$.json \
     && mv -f /tmp/$$.json $(motion.config.file) \
     || bashio::log.error "Unable to update ${e} in $(motion.config.file)"
 
@@ -210,12 +212,45 @@ function addon::config.roles()
 {
   bashio::log.trace "${FUNCNAME[0]} ${*}"
 
-  local person=$(addon::config.option roles.person "")
-  local primary=$(addon::config.option roles.primary "")
-  local secondary=$(addon::config.option roles.secondary "")
-  local tertiary=$(addon::config.option roles.tertiary "")
+  local person=$(addon::config.option roles.person "none")
+  local primary=$(addon::config.option roles.primary "none")
+  local secondary=$(addon::config.option roles.secondary "none")
+  local tertiary=$(addon::config.option roles.tertiary "none")
 
   echo '{"person":"'${person:-}'","primary":"'${primary:-}'","secondary":"'${secondary:-}'","tertiary":"'${tertiary:-}'"}'
+}
+
+## devices
+
+function addon::config.devices()
+{
+  bashio::log.trace "${FUNCNAME[0]} ${*}"
+
+  local person=$(addon::config.option devices.person "none")
+  local primary=$(addon::config.option devices.primary "none")
+  local secondary=$(addon::config.option devices.secondary "none")
+  local tertiary=$(addon::config.option devices.tertiary "none")
+
+  echo '{"person":"'${person:-}'","primary":"'${primary:-}'","secondary":"'${secondary:-}'","tertiary":"'${tertiary:-}'"}'
+}
+
+## repo
+
+function addon::config.repo()
+{
+  bashio::log.trace "${FUNCNAME[0]} ${*}"
+
+  local mai_url=$(addon::config.option motionai.url "https://github.com/motion-ai/motion-ai")
+  local mai_tag=$(addon::config.option motionai.tag "dev")
+  local mai_branch=$(addon::config.option motionai.branch "master")
+  local mai_release=$(addon::config.option motionai.release "none")
+
+  local aah_url=$(addon::config.option ageathome.url "https://github.com/ageathome/core")
+  local aah_tag=$(addon::config.option ageathome.tag "dev")
+  local aah_branch=$(addon::config.option ageathome.branch "master")
+  local aah_release=$(addon::config.option ageathome.release "none")
+
+  echo '{"motionai":{"url":"'${mai_url:-}'","release":"'${mai_release:-}'","branch":"'${mai_branch:-}'","tag":"'${mai_tag:-}'"},"ageathome":{"url":"'${aah_url:-}'","release":"'${aah_release:-}'","branch":"'${aah_branch:-}'","tag":"'${aah_tag:-}'"}}'
 }
 
 ## location
@@ -279,9 +314,9 @@ function addon::config.mqtt()
     bashio::log.debug "${FUNCNAME[0]}: MQTT service unavailable through supervisor; using configuration."
   fi
 
-  if [ -z "${host:-}" ]; then 
-    host=$(bashio::config "mqtt.host") 
-    if [ "${host:-null}" = 'null' ]; then 
+  if [ -z "${host:-}" ]; then
+    host=$(bashio::config "mqtt.host")
+    if [ "${host:-null}" = 'null' ]; then
       host="${ip:-127.0.0.1}"
       bashio::log.debug "${FUNCNAME[0]}: MQTT host configuration undefined; using host IP address: ${host:-}"
     fi
@@ -302,7 +337,17 @@ function addon::config.timezone()
 {
   bashio::log.trace "${FUNCNAME[0]} ${*}"
 
-  local timezone=$(addon::config.option timezone "GMT")
+  local config=$(curl -sSL -X GET -H "Authorization: Bearer ${SUPERVISOR_TOKEN}" -H "Content-Type: application/json" http://supervisor/core/api/config)
+  local timezone=$(echo "${config:-null}" | jq -r '.time_zone?')
+
+  if [ -z "${timezone:-}" ] || [ "${timezone:-null}" == 'null' ]; then
+    timezone='GMT'
+    bashio::log.debug "${FUNCNAME[0]} ${*} - setting timezone to default: ${timezone}"
+  else
+    bashio::log.debug "${FUNCNAME[0]} ${*} - timezone: ${timezone}"
+  fi
+
+  timezone=$(addon::config.option timezone "${timezone}")
 
   if [ -s "/usr/share/zoneinfo/${timezone}" ]; then
     cp /usr/share/zoneinfo/${timezone} /etc/localtime
@@ -325,7 +370,7 @@ function addon::config.network()
                  | egrep -v 'scope global docker' \
                  | awk '{ print $2 }')
 
-  jq -c '.ipaddr="'${ipaddr%%/*}'"' $(motion.config.file) > /tmp/$$.json \
+  jq -Sc '.ipaddr="'${ipaddr%%/*}'"' $(motion.config.file) > /tmp/$$.json \
     && mv -f /tmp/$$.json $(motion.config.file) \
     || bashio::log.error "Unable to update $(motion.config.file)"
 
@@ -339,11 +384,30 @@ function addon::config.options()
 {
   bashio::log.trace "${FUNCNAME[0]} ${*}"
 
-  local device=$(addon::config.option device "$(hostname -s)")
+  local config=$(curl -sSL -X GET -H "Authorization: Bearer ${SUPERVISOR_TOKEN}" -H "Content-Type: application/json" http://supervisor/core/api/config)
+  local site=$(echo "${config:-null}" | jq -r '.location_name?')
+
+  if [ -z "${site:-}" ] || [ "${site:-null}" == 'null' ]; then
+    site='My House'
+    bashio::log.debug "${FUNCNAME[0]} ${*} - Setting site to default: ${site}"
+  else
+    bashio::log.debug "${FUNCNAME[0]} ${*} - Found site: ${site}"
+  fi
+  site=$(addon::config.option site "${site}")
+
+  local host=$(curl -sSL -X GET -H "Authorization: Bearer ${SUPERVISOR_TOKEN}" -H "Content-Type: application/json" http://supervisor/host/info)
+  local device=$(echo "${host:-null}" | jq -r '.data.hostname?')
+  if [ -z "${device:-}" ] || [ "${device:-null}" == 'null' ]; then
+    device="$(hostname -s)"
+    bashio::log.debug "${FUNCNAME[0]} ${*} - Setting device to default: ${device}"
+  else
+    bashio::log.debug "${FUNCNAME[0]} ${*} - Found device: ${device}"
+  fi
+  device=$(addon::config.option device "${device}")
+
   local rssurl=$(addon::config.option uptimerobot_rssurl "unknown")
   local iperf=$(addon::config.option iperf_host "127.0.0.1")
   local unit_system=$(addon::config.option unit_system "imperial")
-  local site=$(addon::config.option site "My House")
   local group=$(addon::config.option group "motion")
   local client=$(addon::config.option client "+")
   local share_dir=$(addon::config.option share_dir "/share/${group:-motion}")
@@ -364,7 +428,8 @@ function addon::config.init()
 
   local json='{"supervisor":{"services":'${services:-null}',"host":'${host:-null}',"config":'${config:-null}',"info":'${info:-null}'},"version":"'"${BUILD_VERSION:-}"'","config_path":"'"${CONFIG_PATH}"'","hostname":"'"$(hostname)"'","arch":"'$(arch)'","date":'$(date -u +%s)'}'
 
-  echo "${json}" | jq -Sc '.' > $(motion.config.file)
+  bashio::log.debug "Initializing: $(motion.config.file)"
+  echo "${json}" | jq -Sc '.' | tee $(motion.config.file) || bashio::log.debug "Failed to initialize: $(motion.config.file)"
 }
 
 ## config
@@ -376,13 +441,15 @@ function addon::config()
   local init=$(addon::config.init)
   local timezone=$(addon::config.timezone)
   local roles=$(addon::config.roles)
+  local devices=$(addon::config.devices)
+  local repo=$(addon::config.repo)
   local overview=$(addon::config.overview)
   local location=$(addon::config.location)
   local network=$(addon::config.network)
   local mqtt=$(addon::config.mqtt "${network:-}")
   local options=$(addon::config.options)
 
-  echo '{"timezone":"'${timezone:-}'","location":'${location:-null}',"network":'${network:-null}',"overview":'${overview:-null}',"roles":'${roles:-null}',"mqtt":'${mqtt:-null}',"options":'${options:-null}'}'
+  echo '{"timezone":"'${timezone:-}'","location":'${location:-null}',"network":'${network:-null}',"overview":'${overview:-null}',"repo":'${repo:-null}',"roles":'${roles:-null}',"devices":'${devices:-null}',"mqtt":'${mqtt:-null}',"options":'${options:-null}',"init":'${init:-null}'}'
 }
 
 ###
@@ -434,65 +501,182 @@ if [ -z "${MOTION_APACHE_HTDOCS:-}" ]; then
   exit 1
 fi
 
+##
+## apache
+##
+
 start_apache_background ${MOTION_APACHE_CONF} ${MOTION_APACHE_HOST} ${MOTION_APACHE_PORT}
 bashio::log.debug "Started Apache on ${MOTION_APACHE_HOST}:${MOTION_APACHE_PORT}"
 
-###
-# download YAML, etc..
-###
+##
+## motionai
+##
 
-if [ ! -d /share/motion-ai ]; then
-  bashio::log.debug "Cloning /share/motion-ai"
-  git clone http://github.com/motion-ai/motion-ai /share/motion-ai &> /dev/null
-  INIT=1
+tag=$(echo "${CONFIG:-null}" | jq -r '.repo.motionai.tag?')
+branch=$(echo "${CONFIG:-null}" | jq -r '.repo.motionai.branch?')
+release=$(echo "${CONFIG:-null}" | jq -r '.repo.motionai.release?')
+
+if [ "${tag:-null}" == 'release' ] && [ "${release:-}" = 'none' ] && [ "${release:-null}" = 'null' ]; then
+  bashio::log.debug "motionai - no release specified; defaulting to latest"
+  release='latest'
 fi
 
-if [ -d /share/motion-ai ]; then
-  pushd /share/motion-ai &> /dev/null
-  bashio::log.debug "Updating /share/motion-ai"
-  git checkout . &> /dev/null
-  git pull &> /dev/null
-  popd &> /dev/null
+if [ "${tag:-null}" == 'dev' ] && [ "${branch:-}" != 'master' ]; then
+  bashio::log.debug "motionai branch ${branch} not supported (yet); defaulting to master"
+  branch='master'
 else
-  bashio::log.fatal "Cannot find /share/motion-ai"
-  exit 1
+  bashio::log.debug "motionai branch: ${branch}"
 fi
 
-if [ ! -d /share/ageathome ]; then
-  bashio::log.debug "Cloning /share/ageathome"
-  git clone http://github.com/ageathome/core /share/ageathome &> /dev/null
-  INIT=1
+if [ "${tag:-dev}" != 'dev' ]; then
+  bashio::log.debug "motionai - tag ${tag}; release: ${release} not supported (yet); defaulting to dev"
+  tag='dev'
+else
+  bashio::log.debug "motionai tag: ${tag}"
 fi
 
-if [ -d /share/ageathome ]; then
-  pushd /share/ageathome &> /dev/null
-  if [ ! -e motion-ai ] && [ -d /share/motion-ai ]; then
-    bashio::log.debug "Linking /share/motion-ai"
-    ln -s /share/motion-ai .
-  elif [ ! -d /share/motion-ai ]; then
-    bashio::log.error "Could not link to /share/motion-ai"
+# dev: download
+if [ "${tag:-dev}" == 'dev' ]; then
+  if [ ! -d /share/motion-ai ]; then
+    url=$(echo "${CONFIG:-null}" | jq -r '.repo.motionai.url?')
+    bashio::log.debug "motionai url: ${url}"
+
+    bashio::log.debug "Cloning /share/motion-ai"
+    git clone http://github.com/motion-ai/motion-ai /share/motion-ai &> /dev/null || bashio::log.warning "git clone failed"
+    INIT=1
+  else
+    bashio::log.debug "Exists: /share/motion-ai"
   fi
-  bashio::log.debug "Updating /share/ageathome"
-  git checkout . &> /dev/null
-  git pull &> /dev/null
-  popd &> /dev/null
-else
-  bashio::log.fatal "Cannot find /share/ageathome"
-  exit 1
 fi
+
+# release: download
+if [ "${release:-null}" != 'null' ] && [ "${release:-null}" != 'latest' ]; then
+  download=/share/motionai-${release##*/}
+
+  if [ -s "${download}" ]; then
+    tar tzf ${download} > /dev/null \
+      && \
+      bashio::log.debug "motionai - inspected ${download}; no download required" \
+      || \
+      rm -f "${download}"
+  fi
+
+  if [ ! -s ${download} ]; then
+    curl -ksSL "${release}" -o ${download} 2> /dev/null \
+      && \
+      bashio::log.debug "motionai - downloaded ${release} into ${download}" \
+      ||
+      bashio::log.debug "motionai - failed to download release: ${release:-null}"
+  fi
+
+  if [ -s "${download}" ]; then
+    tar tzf ${download} > /dev/null \
+      && \
+      bashio::log.debug "motionai - successfully inspected: ${download}" \
+      || \
+      bashio::log.debug "motionai - failed to inspect: ${download}"
+  fi
+
+else
+  bashio::log.debug "motionai release: ${release} not supported (yet)"
+fi
+
+# dev: update
+if [ "${tag:-dev}" == 'dev' ]; then
+  if [ -d /share/motion-ai ]; then
+    pushd /share/motion-ai &> /dev/null || bashio::log.warning "popd failed"
+    bashio::log.debug "Updating /share/motion-ai"
+    git checkout . &> /dev/null || bashio::log.warning "git checkout failed"
+    git pull &> /dev/null || bashio::log.warning "git pull failed"
+    popd &> /dev/null || bashio::log.warning "popd failed"
+  else
+    bashio::log.fatal "Cannot find /share/motion-ai"
+    exit 1
+  fi
+fi
+
+##
+## ageathome
+##
+
+tag=$(echo "${CONFIG:-null}" | jq -r '.repo.ageathome.tag?')
+branch=$(echo "${CONFIG:-null}" | jq -r '.repo.ageathome.branch?')
+release=$(echo "${CONFIG:-null}" | jq -r '.repo.ageathome.release?')
+
+if [ "${tag:-dev}" != 'dev' ]; then
+  bashio::log.debug "ageathome - tag ${tag}; release: ${release} not supported (yet); defaulting to dev"
+  tag='dev'
+else
+  bashio::log.debug "ageathome tag: ${tag}"
+fi
+
+if [ "${tag:-dev}" == 'dev' ]; then
+  if [ ! -d /share/ageathome ]; then
+    url=$(echo "${CONFIG:-null}" | jq -r '.repo.ageathome.url?')
+    bashio::log.debug "ageathome url: ${url}"
+
+    bashio::log.debug "Cloning /share/ageathome"
+    git clone http://github.com/ageathome/core /share/ageathome &> /dev/null || bashio::log.warning "git clone failed"
+    INIT=1
+  else
+    bashio::log.debug "Exists: /share/ageathome"
+  fi
+elif [ "${tag:-dev}" == 'release' ]; then
+  bashio::log.debug "ageathome - release"
+else
+  bashio::log.debug "ageathome - update tag: ${tag}; release: ${release}: not supported (yet)"
+fi
+
+if [ "${tag:-dev}" == 'dev' ]; then
+  if [ -d /share/ageathome ]; then
+
+    if [ "${branch:-}" != 'master' ]; then
+      bashio::log.debug "ageathome branch ${branch} not supported (yet); defaulting to master"
+      branch='master'
+    else
+      bashio::log.debug "ageathome branch: ${branch}"
+    fi
+    pushd /share/ageathome &> /dev/null || bashio::log.warning "pushd failed"
+    if [ ! -e motion-ai ] && [ -d /share/motion-ai ]; then
+      bashio::log.debug "Linking /share/motion-ai"
+      ln -s /share/motion-ai .
+    elif [ ! -d /share/motion-ai ]; then
+      bashio::log.error "Could not link to /share/motion-ai"
+    fi
+    bashio::log.debug "Updating /share/ageathome"
+    git checkout . &> /dev/null || bashio::log.warning "git checkout failed"
+    git pull &> /dev/null || bashio::log.warning "git pull failed"
+    popd &> /dev/null || bashio::log.warning "popd failed"
+  else
+    bashio::log.fatal "Cannot find /share/ageathome"
+    exit 1
+  fi
+fi
+
+# HOST_NAME
+host=$(curl -sSL -X GET -H "Authorization: Bearer ${SUPERVISOR_TOKEN}" -H "Content-Type: application/json" http://supervisor/host/info)
+host_name=$(echo "${host:-null}" | jq -r '.data.hostname?')
+if [ -z "${host_name:-}" ] || [ "${host_name:-null}" == 'null' ]; then
+    host_name='homeassistant'
+    bashio::log.debug "Setting host name to default: ${host_name}"
+else
+    bashio::log.debug "Found host name: ${host_name}"
+fi
+
+## setup.json
 
 if [ ! -e /config/setup.json ]; then
   bashio::log.debug "Initializing /share/ageathome"
-  pushd /share/ageathome &> /dev/null
-  MOTION_APP="Age@Home" HOST_NAME="ageathome" HOST_IPADDR="$(echo "${CONFIG:-null}" | jq -r '.network.ip')" \
-    make homeassistant/setup.json &> /dev/null && mv homeassistant/setup.json /config
-  popd &> /dev/null
+  pushd /share/ageathome &> /dev/null || bashio::log.warning "pushd failed"
+  MOTION_APP="Age@Home" \
+    HOST_NAME="${host_name}" \
+    HOST_IPADDR="$(echo "${CONFIG:-null}" | jq -r '.network.ip')" \
+    make homeassistant/setup.json &> /dev/null \
+    && \
+    mv homeassistant/setup.json /config
+  popd &> /dev/null || bashio::log.warning "popd failed"
   INIT=1
 fi
-
-###
-# reload setup
-###
 
 addon::setup.reload
 
@@ -501,28 +685,30 @@ addon::setup.reload
 ###
 
 if [ -d /share/ageathome ] && [ -d /share/motion-ai ] && [ -e /config/setup.json ]; then
-  bashio::log.debug "Updating /config from /share/ageathome/homeassistant"
-  pushd /share/ageathome/homeassistant &> /dev/null
+  bashio::log.debug "Updating /config from /share/ageathome/homeassistant at $(date)"
+  pushd /share/ageathome/homeassistant &> /dev/null || bashio::log.warning "pushd failed"
   todo=($(ls -1))
-  rsync -a -L --delete "${todo[@]}" /config/ && bashio::log.info "Synchronization successful" || bashio::log.warning "Synchronization failed"
-  popd &> /dev/null
-  bashio::log.debug "Making /config"
-  pushd /config &> /dev/null
+  rsync -a -L --delete "${todo[@]}" /config/ && bashio::log.info "Synchronization successful at $(date)" || bashio::log.warning "Synchronization failed at $(date)"
+  popd &> /dev/null || bashio::log.warning "popd failed"
+  bashio::log.debug "Making /config at $(date)"
+  pushd /config &> /dev/null || bashio::log.warning "pushd failed"
   MOTION_APP="Age@Home" \
-    HOST_NAME="ageathome" \
+    HOST_NAME="${host_name}" \
     HOST_IPADDR="$(echo "${CONFIG:-null}" | jq -r '.network.ip')" \
     PACKAGES="" \
     make &> /dev/null
-  popd &> /dev/null
+  popd &> /dev/null || bashio::log.warning "popd failed"
+  bashio::log.notice "Configuration complete at $(date)"
 elif [ ! -e /config/setup.json ]; then
   bashio::log.fatal "Cannot find /config/setup.json"
   exit 1
 elif [ ! -d /share/ageathome ]; then
   bashio::log.fatal "Cannot find /share/ageathome"
   exit 1
+elif [ ! -d /share/motion-ai ]; then
+  bashio::log.fatal "Cannot find /share/motion-ai"
+  exit 1
 fi
-
-bashio::log.notice "Configuration complete"
 
 ## reboot host if INIT=1
 if [ ${INIT:-0} != 0 ]; then
@@ -530,7 +716,7 @@ if [ ${INIT:-0} != 0 ]; then
   if [ "${reboot:-false}" = 'true' ]; then
     TEMP=$(mktemp)
 
-    bashio::log.info "Requesting host reboot for intitialization in 10 seconds ..."
+    bashio::log.notice "Requesting host reboot for intitialization in 10 seconds ..."
     sleep 10
     reboot=$(curl -w '%{http_code}' -sSL -X POST -H "Authorization: Bearer ${SUPERVISOR_TOKEN}" -H "Content-Type: application/json" http://supervisor/host/reboot -o ${TEMP})
     case ${reboot} in
@@ -559,13 +745,18 @@ fi
 ## forever
 while true; do
 
+    ## validate configuration
+    valid=$(curl -sSL -X POST -H "Authorization: Bearer ${SUPERVISOR_TOKEN}" -H "Content-Type: application/json" "http://supervisor/core/api/config/core/check_config")
+    bashio::log.debug "Configuration validation results: ${valid}" 
+    echo '{"host":"'$(echo "${CONFIG:-null}" | jq -r '.network.ip')'","date":'$(date -u +%s)',"valid":'"${valid:-null}"'}' > /etc/motion/valid.json
+
     ## publish configuration
     ( motion.mqtt.pub -r -q 2 -t "$(motion.config.group)/$(motion.config.device)/start" -f "$(motion.config.file)" &> /dev/null \
-      && bashio::log.info "Published configuration to MQTT; topic: $(motion.config.group)/$(motion.config.device)/start" ) \
+      && bashio::log.debug "Published configuration to MQTT; topic: $(motion.config.group)/$(motion.config.device)/start" ) \
       || bashio::log.debug "Failed to publish configuration to MQTT; config: $(motion.config.mqtt)"
 
     ## sleep
-    bashio::log.debug "Sleeping; ${MOTION_WATCHDOG_INTERVAL:-1800} seconds ..."
+    bashio::log.debug "Sleeping at $(date); ${MOTION_WATCHDOG_INTERVAL:-1800} seconds ..."
     sleep ${MOTION_WATCHDOG_INTERVAL:-1800}
 
 done

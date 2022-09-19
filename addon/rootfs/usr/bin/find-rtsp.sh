@@ -120,7 +120,7 @@ find_rtsp()
   if [ "${DEBUG:-false}" = 'true' ]; then echo "${FUNCNAME[0]} ${*}" &> /dev/stderr; fi
 
   local net=${1:-}
-  local nmap_timeout=${2:-${NMAP_TIMEOUT:-5}}
+  local nmap_timeout=${2:-${NMAP_TIMEOUT:-2}}
   local connect=${3:-${RTSP_CONNECT_TIME:-5}}
   local maxtime=${4:-${RTSP_MAX_TIME:-20}}
   local ipaddr=$(lookup_ipaddr ${net:-})
