@@ -19,7 +19,7 @@ myip()
 
 find_rtsp()
 {
-  local result=$(find-rtsp.sh $(myip) 2> /dev/null)
+  local result=$(find-rtsp.sh $(myip) ${NMAP_TIMEOUT:-3} 2> /dev/null)
 
   echo ${result:-null}
 }
