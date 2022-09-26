@@ -194,7 +194,7 @@ fi
 RTSP_CONNECT_TIME=5
 RTSP_MAX_TIME=15
 NETWORK_SIZE=24
-NMAP_TIMEOUT=3
+NMAP_TIMEOUT=2
 
 ## doit
 find_rtsp ${*} | jq -Sc '.|.date='$(date -u +%s)
