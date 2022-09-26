@@ -120,7 +120,7 @@ find_rtsp()
   if [ "${DEBUG:-false}" = 'true' ]; then echo "${FUNCNAME[0]} ${*}" &> /dev/stderr; fi
 
   local net=${1:-}
-  local nmap_timeout=${2:-${NMAP_TIMEOUT:-2}}
+  local nmap_timeout=${2:-${NMAP_TIMEOUT:-3}}
   local connect=${3:-${RTSP_CONNECT_TIME:-5}}
   local maxtime=${4:-${RTSP_MAX_TIME:-20}}
   local ipaddr=$(lookup_ipaddr ${net:-})
@@ -194,7 +194,7 @@ fi
 RTSP_CONNECT_TIME=5
 RTSP_MAX_TIME=15
 NETWORK_SIZE=24
+NMAP_TIMEOUT=3
 
 ## doit
-# find_rtsp ${*} | jq -c '[.rtsp[]|select(.status=="found")]'
-find_rtsp ${*} | jq -c '.'
+find_rtsp ${*} | jq -Sc '.|.date='$(date -u +%s)
