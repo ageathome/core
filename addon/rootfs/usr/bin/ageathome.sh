@@ -747,7 +747,7 @@ while true; do
 
     ## validate configuration
     valid=$(curl -w '%{http_code}' -sSL -X POST -H "Authorization: Bearer ${SUPERVISOR_TOKEN}" -H "Content-Type: application/json" "http://supervisor/core/api/config/core/check_config" -o /etc/motion/valid.$$.json )
-    if [ "${valid:-null)" = '200' ]; then
+    if [ "${valid:-null}" = '200' ]; then
       valid=$(jq -Sc '.?' /etc/motion/valid.$$.json)
       bashio::log.debug "Configuration validation results: ${valid}" 
       echo '{"host":"'$(echo "${CONFIG:-null}" | jq -r '.network.ip')'","date":'$(date -u +%s)',"valid":'"${valid:-null}"'}' > /etc/motion/valid.json
