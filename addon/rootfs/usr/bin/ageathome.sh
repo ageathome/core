@@ -746,9 +746,16 @@ fi
 while true; do
 
     ## validate configuration
-    valid=$(curl -sSL -X POST -H "Authorization: Bearer ${SUPERVISOR_TOKEN}" -H "Content-Type: application/json" "http://supervisor/core/api/config/core/check_config")
-    bashio::log.debug "Configuration validation results: ${valid}" 
-    echo '{"host":"'$(echo "${CONFIG:-null}" | jq -r '.network.ip')'","date":'$(date -u +%s)',"valid":'"${valid:-null}"'}' > /etc/motion/valid.json
+    valid=$(curl -w '%{http_code}' -sSL -X POST -H "Authorization: Bearer ${SUPERVISOR_TOKEN}" -H "Content-Type: application/json" "http://supervisor/core/api/config/core/check_config" -o /etc/motion/valid.$$.json )
+    if [ "${valid:-null)" = '200' ]; then
+      valid=$(jq -Sc '.?' /etc/motion/valid.$$.json)
+      bashio::log.debug "Configuration validation results: ${valid}" 
+      echo '{"host":"'$(echo "${CONFIG:-null}" | jq -r '.network.ip')'","date":'$(date -u +%s)',"valid":'"${valid:-null}"'}' > /etc/motion/valid.json
+    else
+      bashio::log.debug "Configuration API failed: error: ${valid}; $(cat /etc/motion/valid.$$.json)" 
+      echo '{"host":"'$(echo "${CONFIG:-null}" | jq -r '.network.ip')'","date":'$(date -u +%s)',"valid":null}' > /etc/motion/valid.json
+    fi
+    rm -f /etc/motion/valid.$$.json
 
     ## publish configuration
     ( motion.mqtt.pub -r -q 2 -t "$(motion.config.group)/$(motion.config.device)/start" -f "$(motion.config.file)" &> /dev/null \
