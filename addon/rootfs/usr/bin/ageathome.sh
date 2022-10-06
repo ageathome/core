@@ -538,10 +538,10 @@ fi
 
 # dev: download
 if [ "${tag:-dev}" == 'dev' ]; then
-  if [ ! -d /share/motion-ai ]; then
-    url=$(echo "${CONFIG:-null}" | jq -r '.repo.motionai.url?')
-    bashio::log.debug "motionai url: ${url}"
+  url=$(echo "${CONFIG:-null}" | jq -r '.repo.motionai.url?')
 
+  if [ ! -d /share/motion-ai ]; then
+    bashio::log.debug "motionai url: ${url}"
     bashio::log.debug "Cloning /share/motion-ai"
     git clone http://github.com/motion-ai/motion-ai /share/motion-ai &> /dev/null || bashio::log.warning "git clone failed"
     INIT=1
