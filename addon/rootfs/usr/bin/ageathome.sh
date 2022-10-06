@@ -532,6 +532,7 @@ if [ "${tag:-dev}" != 'dev' ]; then
   bashio::log.debug "motionai - tag ${tag}; release: ${release} not supported (yet); defaulting to dev"
   tag='dev'
 else
+  bashio::log.debug "motionai - tag ${tag}; release: ${release}"
   bashio::log.debug "motionai tag: ${tag}"
 fi
 
@@ -545,6 +546,7 @@ if [ "${tag:-dev}" == 'dev' ]; then
     git clone http://github.com/motion-ai/motion-ai /share/motion-ai &> /dev/null || bashio::log.warning "git clone failed"
     INIT=1
   else
+    bashio::log.debug "motionai url: ${url}"
     bashio::log.debug "Exists: /share/motion-ai"
   fi
 fi
@@ -749,21 +751,23 @@ while true; do
     valid=$(curl -w '%{http_code}' -sSL -X POST -H "Authorization: Bearer ${SUPERVISOR_TOKEN}" -H "Content-Type: application/json" "http://supervisor/core/api/config/core/check_config" -o /etc/motion/valid.$$.json )
     if [ "${valid:-null}" = '200' ]; then
       valid=$(jq -Sc '.?' /etc/motion/valid.$$.json)
-      bashio::log.notice "Configuration validation results: ${valid}" 
+      bashio::log.notice "Configuration validation at $(date); results: ${valid}" 
       echo '{"host":"'$(echo "${CONFIG:-null}" | jq -r '.network.ip')'","date":'$(date -u +%s)',"valid":'"${valid:-null}"'}' > /etc/motion/valid.json
+      SLEEP=
     else
-      bashio::log.debug "Configuration API failed: error: ${valid}; $(cat /etc/motion/valid.$$.json)" 
+      bashio::log.debug "Configuration API failed at $(date): error: ${valid}; $(cat /etc/motion/valid.$$.json)" 
       echo '{"host":"'$(echo "${CONFIG:-null}" | jq -r '.network.ip')'","date":'$(date -u +%s)',"valid":null}' > /etc/motion/valid.json
+      SLEEP=60
     fi
     rm -f /etc/motion/valid.$$.json
 
     ## publish configuration
     ( motion.mqtt.pub -r -q 2 -t "$(motion.config.group)/$(motion.config.device)/start" -f "$(motion.config.file)" &> /dev/null \
-      && bashio::log.notice "Published configuration to MQTT; topic: $(motion.config.group)/$(motion.config.device)/start" ) \
+      && bashio::log.notice "Published configuration to MQTT at $(date); topic: $(motion.config.group)/$(motion.config.device)/start" ) \
       || bashio::log.debug "Failed to publish configuration to MQTT; config: $(motion.config.mqtt)"
 
     ## sleep
-    bashio::log.debug "Sleeping at $(date); ${MOTION_WATCHDOG_INTERVAL:-1800} seconds ..."
-    sleep ${MOTION_WATCHDOG_INTERVAL:-1800}
+    bashio::log.debug "Sleeping at $(date); ${SLEEP:-${MOTION_WATCHDOG_INTERVAL:-1800}} seconds ..."
+    sleep ${SLEEP:-${MOTION_WATCHDOG_INTERVAL:-1800}}
 
 done
