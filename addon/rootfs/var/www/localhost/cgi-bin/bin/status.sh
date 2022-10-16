@@ -65,7 +65,7 @@ function status()
 
 if [ -d "/tmpfs" ]; then TMPDIR="/tmpfs"; else TMPDIR="/tmp"; fi
 
-TTL=300
+TTL=30
 SECONDS=$(date +%s)
 DATE=$(echo "${SECONDS} / ${TTL} * ${TTL}" | bc)
 
