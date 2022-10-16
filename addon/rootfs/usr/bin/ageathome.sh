@@ -753,15 +753,16 @@ while true; do
       valid=$(jq -Sc '.?' /etc/motion/valid.$$.json)
       bashio::log.notice "Configuration validation at $(date); results: ${valid}" 
       echo '{"host":"'$(echo "${CONFIG:-null}" | jq -r '.network.ip')'","date":'$(date -u +%s)',"valid":'"${valid:-null}"'}' > /etc/motion/valid.json
-      if [ "${SLEEP:-}" = '10' ]; then
+      if [ $(echo "${valid:-null}" | jq '.result!="valid"') = 'true' ]; then
         SLEEP=30
+        bashio::log.debug "Configuration invalid; re-trying in ${SLEEP:-} seconds" 
       else 
         SLEEP=
       fi
     else
-      bashio::log.debug "Configuration API failed at $(date): error: ${valid}; $(cat /etc/motion/valid.$$.json)" 
       echo '{"host":"'$(echo "${CONFIG:-null}" | jq -r '.network.ip')'","date":'$(date -u +%s)',"valid":null}' > /etc/motion/valid.json
       SLEEP=10
+      bashio::log.debug "Configuration API failed at $(date); retrying in ${SLEEP:-} seconds: error: ${valid}; $(cat /etc/motion/valid.$$.json)" 
     fi
     rm -f /etc/motion/valid.$$.json
 
