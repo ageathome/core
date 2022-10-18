@@ -751,18 +751,18 @@ while true; do
     valid=$(curl -w '%{http_code}' -sSL -X POST -H "Authorization: Bearer ${SUPERVISOR_TOKEN}" -H "Content-Type: application/json" "http://supervisor/core/api/config/core/check_config" -o /etc/motion/valid.$$.json )
     if [ "${valid:-null}" = '200' ]; then
       valid=$(jq -Sc '.?' /etc/motion/valid.$$.json)
-      bashio::log.notice "Configuration validation at $(date); results: ${valid}" 
+      bashio::log.notice "Configuration validation at $(date); results: ${valid}"
       echo '{"host":"'$(echo "${CONFIG:-null}" | jq -r '.network.ip')'","date":'$(date -u +%s)',"valid":'"${valid:-null}"'}' > /etc/motion/valid.json
       if [ $(echo "${valid:-null}" | jq '.result!="valid"') = 'true' ]; then
         SLEEP=30
-        bashio::log.debug "Configuration invalid; re-trying in ${SLEEP:-} seconds" 
-      else 
+        bashio::log.debug "Configuration invalid; re-trying in ${SLEEP:-} seconds"
+      else
         SLEEP=
       fi
     else
       echo '{"host":"'$(echo "${CONFIG:-null}" | jq -r '.network.ip')'","date":'$(date -u +%s)',"valid":null}' > /etc/motion/valid.json
       SLEEP=10
-      bashio::log.debug "Configuration API failed at $(date); retrying in ${SLEEP:-} seconds: error: ${valid}; $(cat /etc/motion/valid.$$.json)" 
+      bashio::log.debug "Configuration API failed at $(date); retrying in ${SLEEP:-} seconds: error: ${valid}; $(cat /etc/motion/valid.$$.json)"
     fi
     rm -f /etc/motion/valid.$$.json
 
