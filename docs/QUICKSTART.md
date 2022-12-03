@@ -4,7 +4,7 @@
 
 Alternatively use a virtual machine:
 
-- Download [VirtualBox](https://www.virtualbox.org/) and Home Assistant OS [image (v9.2)](https://github.com/home-assistant/operating-system/releases/download/9.2/haos_ova-9.2.vdi.zip).  Create a virtual machine: LINUX/4.x (64-bit) with 3GB RAM; EFI enable; bridged networking; Intel Audio.  Recommended to resize image to at least 64GB+ using VirtualBox's virtual media manager.
+- Download [VirtualBox](https://www.virtualbox.org/) and Home Assistant OS [image (v9.4)](https://github.com/home-assistant/operating-system/releases/download/9.4/haos_ova-9.4.vdi.zip).  Create a virtual machine: LINUX/4.x (64-bit) with 3GB RAM; EFI enable; bridged networking; Intel Audio.  Recommended to resize image to at least 64GB+ using VirtualBox's virtual media manager.
 
 
 # Installing the _add-on_
