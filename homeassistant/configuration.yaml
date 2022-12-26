@@ -51,6 +51,7 @@ sensor datetime:
 
 frontend:
   extra_module_url:
+    - /local/resources/modules/history-explorer-card.js
     - /local/resources/modules/apexcharts-card.js
     - /local/resources/modules/card-mod.js
     - /local/resources/modules/mushroom.js
@@ -75,7 +76,6 @@ binary_sensor: !include_dir_merge_list binary_sensor/
 automation: !include_dir_merge_list automation/
 group: !include_dir_merge_named group/
 counter: !include_dir_merge_named counter/
-mqtt: !include_dir_merge_named mqtt/
 device_tracker: !include_dir_merge_list device_tracker/
 shell_command: !include_dir_merge_named shell_command/
 notify: !include_dir_merge_list notify/
@@ -87,3 +87,9 @@ panel_iframe: !include_dir_merge_named panel_iframe/
 input_datetime: !include_dir_merge_named input_datetime/
 utility_meter: !include_dir_merge_named utility_meter/
 
+###
+## mqtt is different
+###
+
+mqtt:
+  sensor: !include_dir_merge_list mqtt/sensor
