@@ -14,7 +14,6 @@ dhcp:
 energy:
 ffmpeg:
 hassio:
-image:
 map:
 media_source:
 mobile_app:
