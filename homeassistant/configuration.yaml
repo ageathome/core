@@ -16,6 +16,7 @@ ffmpeg:
 hassio:
 map:
 media_source:
+image_upload:
 mobile_app:
 my:
 network:
