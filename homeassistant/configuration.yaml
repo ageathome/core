@@ -8,22 +8,28 @@ homeassistant:
 
 ## DEFAULT
 
+bluetooth:
 cloud:
 config:
+conversation:
 dhcp:
 energy:
 ffmpeg:
-hassio:
+frontend:
 hardware:
+hassio:
+homeassistant_alerts:
+homekit:
+image_upload:
 map:
 media_source:
-image_upload:
 mobile_app:
 my:
 network:
 person:
 python_script:
 scene:
+schedule:
 script:
 ssdp:
 stream:
@@ -35,7 +41,6 @@ usb:
 webhook:
 zeroconf:
 zone:
-homekit:
 
 tts:
   - platform: google_translate
