@@ -15,7 +15,6 @@ conversation:
 dhcp:
 energy:
 ffmpeg:
-frontend:
 hardware:
 hassio:
 homeassistant_alerts:
