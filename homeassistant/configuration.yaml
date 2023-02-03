@@ -6,40 +6,9 @@ homeassistant:
   allowlist_external_dirs:
     - '/config'
 
-## DEFAULT
+default_config:
 
-bluetooth:
-cloud:
-config:
-conversation:
-dhcp:
-energy:
-ffmpeg:
-hardware:
-hassio:
-homeassistant_alerts:
-homekit:
-image_upload:
-map:
-media_source:
-mobile_app:
-my:
-network:
-person:
 python_script:
-scene:
-schedule:
-script:
-ssdp:
-stream:
-sun:
-system_health:
-tag:
-timer:
-usb:
-webhook:
-zeroconf:
-zone:
 
 tts:
   - platform: google_translate
