@@ -8,14 +8,16 @@ See [QUICKSTART.md](docs/QUICKSTART.md) for installation instructions.
 
 Language|files|blank|comment|code
 :-------|-------:|-------:|-------:|-------:
-JSON|6|0|0|188245
-YAML|131|508|551|8265
-Bourne Shell|14|290|184|1246
-make|3|219|115|1176
-Markdown|6|129|0|330
-Python|6|20|26|218
-HTML|2|18|0|80
-Bourne Again Shell|6|14|2|70
-Dockerfile|1|19|7|58
+YAML|845|9218|25824|256671
+JSON|59|2|0|79927
+JavaScript|9|215|454|5143
+Bourne Shell|62|585|303|2906
+Python|39|676|254|2767
+Markdown|14|548|0|1852
+make|3|208|91|1481
+Jupyter Notebook|1|0|1020|927
+Text|3|25|0|423
+HTML|1|19|1|89
+XML|1|1|0|89
 --------|--------|--------|--------|--------
-SUM:|175|1217|885|199688
+SUM:|1037|11497|27947|352275

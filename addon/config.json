@@ -13,7 +13,7 @@
   },
   "hassio_api": true,
   "hassio_role": "manager",
-  "homeassistant": "2023.2.3",
+  "homeassistant": "2023.3.1",
   "homeassistant_api": true,
   "host_network": true,
   "image": "dcmartin/{arch}-addon-ageathome",
