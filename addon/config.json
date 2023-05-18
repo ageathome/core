@@ -67,10 +67,6 @@
     "w3w": {
       "apikey": "none",
       "words": "///what.three.words"
-    },
-    "wifi": {
-      "password": "none",
-      "ssid": "none"
     }
   },
   "panel_admin": true,
@@ -144,10 +140,6 @@
     "w3w": {
       "apikey": "str?",
       "words": "str?"
-    },
-    "wifi": {
-      "password": "str?",
-      "ssid": "str?"
     }
   },
   "services": [
@@ -159,7 +151,7 @@
   "timeout": 300,
   "tmpfs": true,
   "url": "https://github.com/ageathome",
-  "version": "0.8.41",
+  "version": "0.8.42",
   "video": false,
   "watchdog": "http://[HOST]:[PORT:7999]/cgi-bin/config",
   "webui": "http://[HOST]:[PORT:7999]/"
