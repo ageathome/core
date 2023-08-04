@@ -13,7 +13,7 @@
   },
   "hassio_api": true,
   "hassio_role": "manager",
-  "homeassistant": "2023.5.4",
+  "homeassistant": "2023.8.0",
   "homeassistant_api": true,
   "host_network": true,
   "image": "dcmartin/{arch}-addon-ageathome",
@@ -151,7 +151,7 @@
   "timeout": 300,
   "tmpfs": true,
   "url": "https://github.com/ageathome",
-  "version": "0.8.44",
+  "version": "0.8.45",
   "video": false,
   "watchdog": "http://[HOST]:[PORT:7999]/cgi-bin/config",
   "webui": "http://[HOST]:[PORT:7999]/"
